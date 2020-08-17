@@ -46,7 +46,7 @@ class Server:
         :return: request response
         """
         # previous website freegeoip.net is shutdown, hacky workaround to always return Aus, Melbourne
-        return {"country_code": "aus", "city": "Melbourne"}
+        return {"country_code": "au", "city": "Melbourne"}
 
 # Server list
 server_list = []
