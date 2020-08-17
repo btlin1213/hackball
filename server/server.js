@@ -9,7 +9,7 @@ request("https://diagnostic.opendns.com/myip", (err, data) =>ip = data.body);
 
 // Try register in global server
 setInterval(() => {
-  ip && request.post({url: "http://soccerjs.herokuapp.com/list", form: {ip}});
+  ip && request.post({url: "https://hackball-global.herokuapp.com/list", form: {ip}});
 }, 2000);
 
 // Init server

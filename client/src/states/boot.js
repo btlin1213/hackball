@@ -80,7 +80,7 @@ Boot.ConnectPopup = class extends Popup {
     ], new Rect(0, 0, 0, 100)), {fill:[1., 0.]});
 
     $
-      .getJSON("http://soccerjs.herokuapp.com/list")
+      .getJSON("https://hackball-global.herokuapp.com/list")
       .then(data => {
         let rows = _.map(data.list, server => {
           return [
