@@ -1,7 +1,4 @@
 *~
-.*
-*.log
-!.gitignore
-node_modules/
-client/dist/
-package-lock.json
+.idea
+__pycache__/
+*.egg-info
