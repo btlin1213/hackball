@@ -11,6 +11,9 @@
   "resolutions": {
     "graceful-fs": "^4.2.4"
   },
+  "engines": {
+    "node": "12.x"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Mati365/Soccer.js"
