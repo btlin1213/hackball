@@ -4,8 +4,12 @@
   "description": "Simple haxball clone written in ES6",
   "main": "server/player.js",
   "scripts": {
-    "start": "node --harmony-destructuring server/player.js",
-    "watch": "nodemon --harmony-destructuring server/player.js"
+    "start": "node server/player.js",
+    "watch": "nodemon server/player.js",
+    "fix-gulp": "npx npm-force-resolutions && npm install"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.4"
   },
   "repository": {
     "type": "git",

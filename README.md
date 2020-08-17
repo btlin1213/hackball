@@ -24,6 +24,9 @@ open source HaxBall clone written in ES6
 ```
 sudo npm install
 ```
+```
+npm run-script fix-gulp
+```
 and
 ```
 ./node_modules/.bin/gulp es6
@@ -32,7 +35,7 @@ and
 ```
 npm run-script start
 ```
-
+Start the client by opening client/index.html in browser
 ## License
 ```
 The MIT License (MIT)
