@@ -45,7 +45,8 @@ class Server:
         :param ip: IP to locate
         :return: request response
         """
-        return requests.get('http://freegeoip.net/json/{}'.format(ip)).json()
+        # previous website freegeoip.net is shutdown, hacky workaround to always return Aus, Melbourne
+        return {"country_code": "aus", "city": "Melbourne"}
 
 # Server list
 server_list = []
