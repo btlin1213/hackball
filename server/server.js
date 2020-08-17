@@ -1,7 +1,8 @@
 "use strict";
 const io = require("socket.io")
     , request = require("request")
-    , chalk = require("chalk");
+    , chalk = require("chalk")
+    , express = require("express");
 
 // Get global ip
 let ip = null;
@@ -13,5 +14,8 @@ setInterval(() => {
 }, 2000);
 
 // Init server
-console.log(chalk.red("Server is listening..."));
+const PORT = process.env.PORT || 5000
+const app = express()
+app.listen(PORT, () => {console.log(`Listening at port ${PORT}`)})
+
 module.exports = io.listen(3000);
