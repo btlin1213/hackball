@@ -1,7 +1,7 @@
 {
   "name": "Soccer.JS Global Server",
   "description": "Simple soccer.js global server that contains list of all servers.",
-  "repository": "https://github.com/Mati365/Soccer.js",
+  "repository": "https://github.com/Redrew/hackball.git",
   "keywords": ["soccer", "haxball"],
   "addons": [],
   "env": {}
