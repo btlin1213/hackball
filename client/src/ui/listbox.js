@@ -89,7 +89,7 @@ export default class ListBox extends Layer {
    * @returns {ListBox}
    */
   deselect() {
-    _.each(this.children, element => element.checked = false);
+    this.children.forEach((child) => {child.checked=false})
     return this;
   }
 
