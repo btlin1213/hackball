@@ -262,8 +262,8 @@ class Room {
     const entities = _.concat(players, this.balls);
 
     // Socket data [x, y, r, flag]
-    let packSize = 4,
-      socketData = new Float32Array(entities.length * packSize);
+    let packSize = 6
+      , socketData = new Float32Array(cachedPlayers.length * packSize);
 
     _.each(entities, (entity, index) => {
       let circle = entity.body.circle,
@@ -301,18 +301,22 @@ class Room {
       v.mul(0.95);
 
       // Data structure: 0FFFFBRR
-      let flags = entity.team | (isBall && 1 << 2) | (entity.flags << 3);
+      let flags =
+          player.team
+        | (index === cachedPlayers.length - 1 && 1 << 2)
+        | player.flags << 3;
 
-      socketData.set(
-        [
-          /** position */
-          circle.x,
-          circle.y,
-          circle.r,
-          flags /** todo: More flags */,
-        ],
-        index * packSize
-      );
+      let mouse_pos_x = player.mouse_position_x || 0.0;
+      let mouse_pos_y = player.mouse_position_y || 0.0;
+      socketData.set([
+        /** position */
+          circle.x
+        , circle.y
+        , circle.r
+        , flags
+        , mouse_pos_x
+        , mouse_pos_y /** todo: More flags */
+      ], index * packSize);
       //
       ///**
       // * Data in buffer is compressed, player must

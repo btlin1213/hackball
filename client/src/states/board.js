@@ -133,6 +133,9 @@ Board.Projector = class extends Layer {
     this.eventForwarding = false;
 
     this.tile = new Sprite(new Rect(0, 0, 16, 16), "tile", new Vec2(4, 1));
+    this.tile2 = new Sprite(new Rect(0, 0, 16, 16), "tile", new Vec2(4, 1));
+    this.prev_mouse_pos_x =0.0;
+    this.prev_mouse_pos_y =0.0;
     this.board = new Rect;
   }
 
@@ -185,8 +188,17 @@ Board.Projector = class extends Layer {
     // Render players
     context.setFontSize(16);
     _.each(this.children, (player, index) => {
-      let isBall = player[3] & 0b100;
+      console.log(player);
+      if (player.length == 6){
+        if (player[4]!=0.0 && player[5]!=0.0){
+          this.prev_mouse_pos_x = player[4];
+          this.prev_mouse_pos_y = player[5];
+        }
 
+        player.pop();
+        player.pop();
+      }
+      let isBall = player[3] & 0b100;
       // Position
       this.tile.rect.xy = player;
       this.tile.rect.w = this.tile.rect.h = player[2] * 2;
@@ -196,17 +208,31 @@ Board.Projector = class extends Layer {
       this.tile.draw(context);
 
       // Draw index
-      if(!isBall)
+      if(!isBall){
+        var newarray = player.slice();
+        newarray[2] = 12
+        var delta_x = this.prev_mouse_pos_x - newarray[0];
+        var delta_y = this.prev_mouse_pos_y - newarray[1];
+        var ratio = delta_x/delta_y;
+        newarray[0] = newarray[0] + delta_x;
+        newarray[1] = newarray[1] + delta_y;
+        newarray[3] = 4;
+        this.tile2.rect.xy = newarray;
+        this.tile2.rect.w = this.tile2.rect.h = newarray[2] * 2;
+        this.tile2.tileIndex.xy = [!isBall ? 1 : (newarray[3] & 0b011), 0];
+        this.tile2.draw(context);
+
         context
           .fillWith(Color.Hex.WHITE)
           .drawText(index, new Vec2(this.tile.rect.x + player[2] - 5, this.tile.rect.y + this.tile.rect.h - 7));
-
+      }
       // Check flags
       let flags = player[3] >> 3 & 0b111;
       if(flags & 2)
         context
           .strokeWith(Color.Hex.WHITE)
           .strokeCircle(new Vec2(this.tile.rect.x + player[2], this.tile.rect.y + player[2]), player[2], 4);
+
     });
 
     ctx.restore();
@@ -232,22 +258,27 @@ Board.Projector = class extends Layer {
     }
   }
 
+
   /** @inheritdoc */
   onEvent(event) {
-    if(!event.isKeyboardEvent())
-      return;
-
-    let flag = 0;
-    switch(event.data) {
-      /** Space */
-      case 32: flag = 1 << 1; break;
+    if(event.isKeyboardEvent()){
+      let flag = 0;
+      switch(event.data) {
+        /** Space */
+        case 32: flag = 1 << 1; break;
+      }
+  
+      // Add flag when key pressed, remove when released
+      switch(event.type) {
+        case Message.Type.KEY_DOWN: Client.emit("addFlag", flag);     break;
+        case Message.Type.KEY_UP:   Client.emit("removeFlag", flag);  break;
+      }
+    }else if(event.isMouseEvent()){
+      switch(event.type) {
+        case Message.Type.MOUSE_MOVE: Client.emit("mouse_position", event.data);break;
+      }
     }
 
-    // Add flag when key pressed, remove when released
-    switch(event.type) {
-      case Message.Type.KEY_DOWN: Client.emit("addFlag", flag);     break;
-      case Message.Type.KEY_UP:   Client.emit("removeFlag", flag);  break;
-    }
   }
 
   /** @inheritdoc */
