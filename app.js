@@ -15,8 +15,8 @@ app.get("/" + CLIENT_APP, (req, res) =>
 );
 app.use(express.static("client"));
 app.get("/", (req, res) => res.sendFile(INDEX, { root: __dirname }));
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Listening at port ${PORT}`);
 });
 
-module.exports = io();
+module.exports = io(server);

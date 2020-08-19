@@ -1,5 +1,5 @@
 import _ from "lodash";
-import io from "socket.io-client";
+import io from "./socket.io/socket.io.js";
 
 /** Connect socket to server */
 var socket = null;
