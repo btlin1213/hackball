@@ -24,7 +24,7 @@ import Client from "../multiplayer/client";
 export default class Boot extends State {
   /** @inheritdoc */
   init() {
-    this.add(new Text(new Rect(this.rect.w / 2 - 130, this.rect.h - 64, 400, 48), "Soccer.JS"));
+    this.add(new Text(new Rect(this.rect.w / 2 - 130, this.rect.h - 64, 400, 48), "HackBall"));
     this.showPopup(new Boot.ConnectPopup);
   }
 };

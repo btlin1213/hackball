@@ -105,7 +105,7 @@ export default class RoomList extends State {
       .add(new Button(new Rect(0, 0, 90, 16), "About"), {expand: 2})
       .addForwarder(
           Message.Type.MOUSE_CLICK
-        , _.partial(Popup.confirm, this, "Soccer.JS Ver. 1.0", Popup.Type.OK)
+        , _.partial(Popup.confirm, this, "HackBall Ver. 0.1, build from Soccer.JS", Popup.Type.OK)
       );
   }
 };
