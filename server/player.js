@@ -4,7 +4,7 @@ const validate = require("validate.js")
     , _ = require("lodash");
 
 const { Room } = require("./room")
-    , io = require("./server");
+    , io = require("../app");
 
 /**
  * Player socket class

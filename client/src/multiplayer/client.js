@@ -22,7 +22,7 @@ export default {
    */
   , connect(ip) {
     return new Promise((resolve, reject) => {
-      socket = io.connect(`ws://${ip}:3000`, {'connect timeout': 500, 'max reconnection attempts': 1});
+      socket = io();
       socket.on("serverReady", resolve);
 
       // 'connect_failed' and 'connect timeout' are not working so trying with timeout

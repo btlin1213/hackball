@@ -3,7 +3,7 @@ const md5 = require("blueimp-md5")
     , _ = require("lodash");
 
 const { Vec2, Circle, Rect } = require("../shared/math")
-    , io = require("./server");
+    , io = require("../app");
 
 /**
  * Body showed on board
