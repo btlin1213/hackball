@@ -78,18 +78,5 @@ Boot.ConnectPopup = class extends Popup {
       , ["IP", .5]
       , ["City", .43]
     ], new Rect(0, 0, 0, 100)), {fill:[1., 0.]});
-
-    $
-      .getJSON("https://hackball-global.herokuapp.com/list")
-      .then(data => {
-        let rows = _.map(data.list, server => {
-          return [
-              server.location.country_code
-            , server.ip
-            , _.truncate(server.location.city, {length: 15, omission: '-'}) || "-//-"
-          ]
-        });
-        this.serverList.setRows(rows);
-      });
   }
 };

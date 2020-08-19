@@ -10,11 +10,17 @@ const { Vec2, Circle, Rect } = require("../shared/math")
  * @class
  */
 class BoardBody {
-  constructor(room, circle, v) {
+  constructor(room, circle, v, type=BoardBody.TYPES.PLAYER) {
     this.circle = circle;
     this.v = v || new Vec2;
     this.room = room;
+    this.type = type;
   }
+}
+
+BoardBody.TYPES = {
+  PLAYER: 0,
+  BALL: 1
 }
 
 /**
@@ -238,46 +244,44 @@ class Room {
    * @private
    */
   _updatePhysics() {
-    let cachedPlayers = this.omitTeam(Room.Teams.SPECTATORS);
-    cachedPlayers.push(...[
-      this.ball
-    ]);
+    const players = this.omitTeam(Room.Teams.SPECTATORS);
+    const entities = _.concat(players, this.balls)
 
     // Socket data [x, y, r, flag]
     let packSize = 4
-      , socketData = new Float32Array(cachedPlayers.length * packSize);
+      , socketData = new Float32Array(entities.length * packSize);
 
-    _.each(cachedPlayers, (player, index) => {
-      let circle = player.body.circle
-        , v = player.body.v
-        , isBall = index === cachedPlayers.length - 1;
+    _.each(entities, (entity, index) => {
+      let circle = entity.body.circle
+        , v = entity.body.v
+        , isBall = entity.body.type === BoardBody.TYPES.BALL;
 
       // Check collisions without ball
-      //if(!isBall)
-        this._checkCollisions(cachedPlayers, index);
+      if(!isBall)
+        this._checkCollisions(entities, index);
 
       // Check collisions with goals
-      if(isBall && !this.board.contains(circle)) {
-        // Create colliding box for each goal and check
-        let collidingGoal = _.findKey(this.goals, goal => {
-          let rect = new Rect(
-              goal.p1[0] - goal.size + (goal.sign === -1 && circle.r * 2)
-            , goal.p1[1] + goal.size
-            , goal.p2[0] - goal.p1[0] + goal.size
-            , goal.p2[1] - goal.p1[1] - goal.size * 2
-          );
-          return rect.intersect(circle);
-        });
+      // if(isBall && !this.board.contains(circle)) {
+      //   // Create colliding box for each goal and check
+      //   let collidingGoal = _.findKey(this.goals, goal => {
+      //     let rect = new Rect(
+      //         goal.p1[0] - goal.size + (goal.sign === -1 && circle.r * 2)
+      //       , goal.p1[1] + goal.size
+      //       , goal.p2[0] - goal.p1[0] + goal.size
+      //       , goal.p2[1] - goal.p1[1] - goal.size * 2
+      //     );
+      //     return rect.intersect(circle);
+      //   });
 
-        // If its colliding with goal
-        if(collidingGoal) {
-          this._addGoal(collidingGoal);
-          return false;
-        }
-      }
+      //   // If its colliding with goal
+      //   if(collidingGoal) {
+      //     this._addGoal(collidingGoal);
+      //     return false;
+      //   }
+      // }
 
       // Check collisions with borders
-      this._calcBordersCollisions(player.body, !isBall && 64);
+      this._calcBordersCollisions(entity.body, !isBall && 64);
 
       // Update physics
       circle.add(v);
@@ -285,9 +289,9 @@ class Room {
 
       // Data structure: 0FFFFBRR
       let flags =
-          player.team
-        | (index === cachedPlayers.length - 1 && 1 << 2)
-        | player.flags << 3;
+          entity.team
+        | (isBall && 1 << 2)
+        | entity.flags << 3;
 
       socketData.set([
         /** position */
@@ -309,14 +313,26 @@ class Room {
     this.broadcast("roomUpdate", socketData.buffer);
   }
 
+  _createBalls() {
+    this.numBalls = 10;
+    this.ballR = 12;
+    this.balls = [];
+    const yInterval = this.board.h / (this.numBalls + 1);
+    for (var i=0; i<this.numBalls; i++) {
+      var x = this.board.w / 2 - this.ballR;
+      var y = (i+1) * yInterval - this.ballR;
+      var circle = new Circle(x, y, this.ballR)
+      this.balls.push({body: new BoardBody(this, 
+      circle, null, BoardBody.TYPES.BALL)});
+    }
+    console.log(this.balls)
+  }
   /**
    * Start/stop room loop
    */
   start() {
-    // Set ball
-    this.ball = {
-      body: new BoardBody(this, new Circle(this.board.w / 2 - 12, this.board.h / 2 - 12, 12))
-    };
+    // Set balls
+    this._createBalls();
 
     // Start interval
     this.physicsInterval && this.stop();

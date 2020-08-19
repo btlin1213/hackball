@@ -77,6 +77,7 @@ export default class Board extends State {
     listeners['roomUpdate'] = data => {
       if(this.projector)
         this.projector.children = _.chunk(new Float32Array(data), 4);
+        console.log(this.projector.children)
     };
 
     return listeners;
@@ -149,37 +150,37 @@ Board.Projector = class extends Layer {
       .strokeLine(new Vec2(this.board.w / 2, this.board.h), new Vec2(this.board.w / 2, 0), 2);
 
     // Render goals
-    context.strokeWith(Color.Hex.WHITE);
-    _.each(this.goals, goal => {
-      let w = goal.size * goal.sign;
+    // context.strokeWith(Color.Hex.WHITE);
+    // _.each(this.goals, goal => {
+    //   let w = goal.size * goal.sign;
 
-      ctx.beginPath();
-      ctx.lineWidth = 2;
+    //   ctx.beginPath();
+    //   ctx.lineWidth = 2;
 
-      // Top rounded border
-      ctx.moveTo(goal.p1[0], goal.p1[1]);
-      ctx.quadraticCurveTo(goal.p1[0] + w, goal.p1[1], goal.p1[0] + w, goal.p1[1] + goal.size);
+    //   // Top rounded border
+    //   ctx.moveTo(goal.p1[0], goal.p1[1]);
+    //   ctx.quadraticCurveTo(goal.p1[0] + w, goal.p1[1], goal.p1[0] + w, goal.p1[1] + goal.size);
 
-      // Line between
-      ctx.moveTo(goal.p1[0] + w , goal.p1[1] + goal.size);
-      ctx.lineTo(goal.p2[0] + w , goal.p2[1] - goal.size);
+    //   // Line between
+    //   ctx.moveTo(goal.p1[0] + w , goal.p1[1] + goal.size);
+    //   ctx.lineTo(goal.p2[0] + w , goal.p2[1] - goal.size);
 
-      // Bottom rounded border
-      ctx.moveTo(goal.p2[0], goal.p2[1]);
-      ctx.quadraticCurveTo(goal.p2[0] + w, goal.p2[1], goal.p2[0] + w, goal.p2[1] - goal.size);
+    //   // Bottom rounded border
+    //   ctx.moveTo(goal.p2[0], goal.p2[1]);
+    //   ctx.quadraticCurveTo(goal.p2[0] + w, goal.p2[1], goal.p2[0] + w, goal.p2[1] - goal.size);
 
-      ctx.stroke();
+    //   ctx.stroke();
 
-      // Draw circles
-      context
-        .fillWith("#ffffff")
+    //   // Draw circles
+    //   context
+    //     .fillWith("#ffffff")
 
-        .strokeCircle(new Vec2(goal.p1[0], goal.p1[1]), 8)
-        .fill()
+    //     .strokeCircle(new Vec2(goal.p1[0], goal.p1[1]), 8)
+    //     .fill()
 
-        .strokeCircle(new Vec2(goal.p2[0], goal.p2[1]), 8)
-        .fill();
-    });
+    //     .strokeCircle(new Vec2(goal.p2[0], goal.p2[1]), 8)
+    //     .fill();
+    // });
 
     // Render players
     context.setFontSize(16);
