@@ -1,18 +1,19 @@
 "use strict";
-const md5 = require("blueimp-md5")
-    , _ = require("lodash");
+const md5 = require("blueimp-md5"),
+  _ = require("lodash");
 
-const { Vec2, Circle, Rect } = require("../shared/math")
-    , io = require("../app");
-
+const { Vec2, Circle, Rect } = require("../shared/math"),
+  config = require("../shared/config"),
+  io = require("../app");
+console.log(config)
 /**
  * Body showed on board
  * @class
  */
 class BoardBody {
-  constructor(room, circle, v, type=BoardBody.TYPES.PLAYER) {
+  constructor(room, circle, v, type = BoardBody.TYPES.PLAYER) {
     this.circle = circle;
-    this.v = v || new Vec2;
+    this.v = v || new Vec2();
     this.room = room;
     this.type = type;
   }
@@ -20,8 +21,8 @@ class BoardBody {
 
 BoardBody.TYPES = {
   PLAYER: 0,
-  BALL: 1
-}
+  BALL: 1,
+};
 
 /**
  * Room class
@@ -31,14 +32,17 @@ class Room {
   constructor(name, admin, maxPlayers, password, hidden) {
     this.name = name;
     this.maxPlayers = maxPlayers || 2;
-    this.password =  md5(password);
+    this.password = md5(password);
 
-    // Ball is separated object
+    // Balls config
+    this.numBalls = config.numBalls;
+    this.ballR = config.ballR;
+    
     // todo: Vertical gates
     this.board = new Rect(0, 0, 600, 300);
     this.goals = {
-        0: {size: 30, sign: -1, p1: [0, 70], p2: [0, 230], score: 0}
-      , 2: {size: 30, sign: 1, p1: [600, 70], p2: [600, 230], score: 0}
+      0: { size: 30, sign: -1, p1: [0, 70], p2: [0, 230], score: 0 },
+      2: { size: 30, sign: 1, p1: [600, 70], p2: [600, 230], score: 0 },
     };
 
     // Players
@@ -47,16 +51,14 @@ class Room {
     this.join(admin);
 
     // hide room in rooms list
-    if(hidden !== true)
-      (Room.list = Room.list || []).push(this);
+    if (hidden !== true) (Room.list = Room.list || []).push(this);
   }
 
   /**
    * Get teams with players nicks
    */
   get teamsHeaders() {
-    return _
-      .chain(this.players)
+    return _.chain(this.players)
       .groupBy("team")
       .mapValues(_.partial(_.map, _, "nick"))
       .value();
@@ -93,8 +95,7 @@ class Room {
    * @returns {Room}
    */
   kick(player) {
-    if(!player)
-      return;
+    if (!player) return;
 
     player.socket.emit("roomKick", "You are kicked!");
     this.leave(player);
@@ -107,7 +108,7 @@ class Room {
    * @returns Players
    */
   omitTeam(omit) {
-    return _.filter(this.players, player => player.team !== omit);
+    return _.filter(this.players, (player) => player.team !== omit);
   }
 
   /**
@@ -131,45 +132,49 @@ class Room {
    * @private
    */
   _checkCollisions(players, index, test) {
-    let p1 = players[index].body
-      , c1 = p1.circle.center
-      , hasCollision = false;
+    let p1 = players[index].body,
+      c1 = p1.circle.center,
+      hasCollision = false;
 
     for (let i = 0; i < players.length; ++i) {
-      if(i === index)
-        continue;
+      if (i === index) continue;
 
       // Get center of circle
-      let p2 = players[i].body
-        , c2 = p2.circle.center;
+      let p2 = players[i].body,
+        c2 = p2.circle.center;
 
       // If the circles are colliding
-      if(p1.circle.intersect(p2.circle)) {
-        if(!test) {
-          let dist = p2.circle.distance(p1.circle)
-            , vx = (c2.x - c1.x) / dist
-            , vy = (c2.y - c1.y) / dist;
+      if (p1.circle.intersect(p2.circle)) {
+        if (!test) {
+          let dist = p2.circle.distance(p1.circle),
+            vx = (c2.x - c1.x) / dist,
+            vy = (c2.y - c1.y) / dist;
 
           // Kick if it's the ball
-          if(i === players.length - 1 && players[index].flags & 2) {
+          if (i === players.length - 1 && players[index].flags & 2) {
             vx *= 8;
             vy *= 8;
           }
 
           // "weight"
-          p1.v.mul(.9);
+          p1.v.mul(0.9);
 
           // Make ball owner
-          if(!p1.owner || p1.owner === -1)
-            p1.owner = i;
+          if (!p1.owner || p1.owner === -1) p1.owner = i;
 
           // Add to velocity vector
-          if(index !== players.length - 1
-              || p1.owner !== i
-              || (Math.sign(p2.v.y) > 0 && p1.circle.y + p1.circle.r * 2 + 5 >= this.board.y + this.board.h)
-              || (Math.sign(p2.v.y) < 0 && p1.circle.y - 5 <= this.board.y)
-              || (Math.sign(p2.v.x) > 0 && p1.circle.x + p1.circle.r * 2 + 5 >= this.board.x + this.board.w)
-              || (Math.sign(p2.v.x) < 1 && p1.circle.x - 5 <= this.board.x)) {
+          if (
+            index !== players.length - 1 ||
+            p1.owner !== i ||
+            (Math.sign(p2.v.y) > 0 &&
+              p1.circle.y + p1.circle.r * 2 + 5 >=
+                this.board.y + this.board.h) ||
+            (Math.sign(p2.v.y) < 0 && p1.circle.y - 5 <= this.board.y) ||
+            (Math.sign(p2.v.x) > 0 &&
+              p1.circle.x + p1.circle.r * 2 + 5 >=
+                this.board.x + this.board.w) ||
+            (Math.sign(p2.v.x) < 1 && p1.circle.x - 5 <= this.board.x)
+          ) {
             p2.v.x += vx * p1.v.length;
             p2.v.y += vy * p1.v.length;
             p2.circle.add(p2.v);
@@ -180,8 +185,7 @@ class Room {
         hasCollision = true;
       }
     }
-    if(!hasCollision)
-      players[players.length - 1].owner = -1;
+    if (!hasCollision) players[players.length - 1].owner = -1;
     return hasCollision;
   }
 
@@ -191,15 +195,21 @@ class Room {
    * @returns {Room}
    */
   _alignOnBoard(player) {
-    if(player.team !== Room.Teams.SPECTATORS) {
+    if (player.team !== Room.Teams.SPECTATORS) {
       let goal = this.goals[player.team];
       player.body.circle.xy = [
-          (goal.p1[0] + goal.p2[0]) / 2 - player.body.circle.r
-        , (goal.p1[1] + goal.p2[1]) / 2 - player.body.circle.r
+        (goal.p1[0] + goal.p2[0]) / 2 - player.body.circle.r,
+        (goal.p1[1] + goal.p2[1]) / 2 - player.body.circle.r,
       ];
 
       // Move to center if has collision
-      while(this._checkCollisions(this.players, _.indexOf(this.players, player), true)) {
+      while (
+        this._checkCollisions(
+          this.players,
+          _.indexOf(this.players, player),
+          true
+        )
+      ) {
         let direction = this.board.center.sub(player.body.circle).normalize();
         player.body.circle.add(direction.mul(player.body.circle.r * 2 + 2));
       }
@@ -215,9 +225,7 @@ class Room {
    */
   _addGoal(team) {
     this.goals[team].score++;
-    this
-      .broadcast("roomScore", _.mapValues(this.goals, "score"))
-      .start();
+    this.broadcast("roomScore", _.mapValues(this.goals, "score")).start();
     return this;
   }
 
@@ -231,9 +239,15 @@ class Room {
   _calcBordersCollisions(body, margin) {
     margin = margin || 0;
 
-    if(body.circle.y < -margin || body.circle.y + body.circle.r * 2 > this.board.h + margin)
+    if (
+      body.circle.y < -margin ||
+      body.circle.y + body.circle.r * 2 > this.board.h + margin
+    )
       body.v.y *= -1;
-    if(body.circle.x < -margin || body.circle.x + body.circle.r * 2 > this.board.w + margin)
+    if (
+      body.circle.x < -margin ||
+      body.circle.x + body.circle.r * 2 > this.board.w + margin
+    )
       body.v.x *= -1;
 
     return this;
@@ -245,20 +259,19 @@ class Room {
    */
   _updatePhysics() {
     const players = this.omitTeam(Room.Teams.SPECTATORS);
-    const entities = _.concat(players, this.balls)
+    const entities = _.concat(players, this.balls);
 
     // Socket data [x, y, r, flag]
-    let packSize = 4
-      , socketData = new Float32Array(entities.length * packSize);
+    let packSize = 4,
+      socketData = new Float32Array(entities.length * packSize);
 
     _.each(entities, (entity, index) => {
-      let circle = entity.body.circle
-        , v = entity.body.v
-        , isBall = entity.body.type === BoardBody.TYPES.BALL;
+      let circle = entity.body.circle,
+        v = entity.body.v,
+        isBall = entity.body.type === BoardBody.TYPES.BALL;
 
       // Check collisions without ball
-      if(!isBall)
-        this._checkCollisions(entities, index);
+      if (!isBall) this._checkCollisions(entities, index);
 
       // Check collisions with goals
       // if(isBall && !this.board.contains(circle)) {
@@ -285,21 +298,21 @@ class Room {
 
       // Update physics
       circle.add(v);
-      v.mul(.95);
+      v.mul(0.95);
 
       // Data structure: 0FFFFBRR
-      let flags =
-          entity.team
-        | (isBall && 1 << 2)
-        | entity.flags << 3;
+      let flags = entity.team | (isBall && 1 << 2) | (entity.flags << 3);
 
-      socketData.set([
-        /** position */
-          circle.x
-        , circle.y
-        , circle.r
-        , flags /** todo: More flags */
-      ], index * packSize);
+      socketData.set(
+        [
+          /** position */
+          circle.x,
+          circle.y,
+          circle.r,
+          flags /** todo: More flags */,
+        ],
+        index * packSize
+      );
       //
       ///**
       // * Data in buffer is compressed, player must
@@ -314,18 +327,16 @@ class Room {
   }
 
   _createBalls() {
-    this.numBalls = 10;
-    this.ballR = 12;
     this.balls = [];
     const yInterval = this.board.h / (this.numBalls + 1);
-    for (var i=0; i<this.numBalls; i++) {
+    for (var i = 0; i < this.numBalls; i++) {
       var x = this.board.w / 2 - this.ballR;
-      var y = (i+1) * yInterval - this.ballR;
-      var circle = new Circle(x, y, this.ballR)
-      this.balls.push({body: new BoardBody(this, 
-      circle, null, BoardBody.TYPES.BALL)});
+      var y = (i + 1) * yInterval - this.ballR;
+      var circle = new Circle(x, y, this.ballR);
+      this.balls.push({
+        body: new BoardBody(this, circle, null, BoardBody.TYPES.BALL),
+      });
     }
-    console.log(this.balls)
   }
   /**
    * Start/stop room loop
@@ -336,7 +347,10 @@ class Room {
 
     // Start interval
     this.physicsInterval && this.stop();
-    this.physicsInterval = setInterval(this._updatePhysics.bind(this), 1000 / 60);
+    this.physicsInterval = setInterval(
+      this._updatePhysics.bind(this),
+      1000 / 60
+    );
   }
   stop() {
     clearInterval(this.physicsInterval);
@@ -351,9 +365,7 @@ class Room {
   setTeam(player, newTeam) {
     // Create new body
     player.team = newTeam;
-    this
-      ._alignOnBoard(player)
-      ._broadcastSettings();
+    this._alignOnBoard(player)._broadcastSettings();
     return this;
   }
 
@@ -376,12 +388,15 @@ class Room {
    */
   _broadcastSettings(socket) {
     let data = {
-        teams: this.teamsHeaders
-      , board: this.board.xywh
-      , goals: this.goals
-      , admin: this.admin.nick
+      teams: this.teamsHeaders,
+      board: this.board.xywh,
+      goals: this.goals,
+      admin: this.admin.nick,
     };
-    (socket ? socket.emit.bind(socket) : this.broadcast.bind(this))("roomSettings", data);
+    (socket ? socket.emit.bind(socket) : this.broadcast.bind(this))(
+      "roomSettings",
+      data
+    );
     return this;
   }
 
@@ -393,9 +408,9 @@ class Room {
   join(player) {
     // Adding to list
     _.assign(player, {
-        team: Room.Teams.SPECTATORS
-      , room: this
-      , body: new BoardBody(this, new Circle(60, 60, 13))
+      team: Room.Teams.SPECTATORS,
+      room: this,
+      body: new BoardBody(this, new Circle(60, 60, 13)),
     });
 
     // Join socket
@@ -418,8 +433,7 @@ class Room {
    * @returns {Room}
    */
   leave(player) {
-    if(!player)
-      return;
+    if (!player) return;
 
     // Leave
     player.socket.leave(this.name);
@@ -438,12 +452,12 @@ class Room {
    * @returns {Array}
    */
   static headers() {
-    return _.map(Room.list, room => {
+    return _.map(Room.list, (room) => {
       return {
-          country: room.admin.country
-        , name: room.name
-        , password: room.isLocked() ? "yes" : "no"
-        , players: room.players.length + "/" + room.maxPlayers
+        country: room.admin.country,
+        name: room.name,
+        password: room.isLocked() ? "yes" : "no",
+        players: room.players.length + "/" + room.maxPlayers,
       };
     });
   }
@@ -451,12 +465,12 @@ class Room {
 
 /** Team codes */
 Room.Teams = {
-    LEFT: 0
-  , SPECTATORS: 1
-  , RIGHT: 2
+  LEFT: 0,
+  SPECTATORS: 1,
+  RIGHT: 2,
 };
 
 /** Export modules */
 module.exports = {
-  Room: Room
+  Room: Room,
 };
