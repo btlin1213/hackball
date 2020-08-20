@@ -162,14 +162,37 @@ class Room {
             vx = (c2.x - c1.x) / dist,
             vy = (c2.y - c1.y) / dist;
 
-          // Kick if it's the ball
 
+          console.log(players[index].flags & 2);
+          // Pick up it's a ball and currently haven't picked up any balls
           if (
-            players[i].body.type === BoardBody.TYPES.BALL &&
-            players[index].flags & 2
+            players[i].body.type === BoardBody.TYPES.BALL && 
+            (players[index].body.hasBall===players[i] || !players[index].body.hasBall)
           ) {
-            vx *= 8;
-            vy *= 8;
+              console.log("lol");
+              players[index].body.hasBall===players[i]
+              players[index].body.hasBall = players[i];
+              players[i].body.pickedUp = true;
+              players[i].body.circle.x = players[index].body.circle.x;
+              players[i].body.circle.y = players[index].body.circle.y;
+              players[i].body.v.x = players[index].body.v.x;
+              players[i].body.v.y = players[index].body.v.y;
+              continue;
+              // vx *= 8;
+              //vy *= 8;
+          } 
+          
+          if (
+            // throw when space bar is pressed
+            players[i].body.type === BoardBody.TYPES.BALL  &&
+            players[index].flags & 2 &&
+            players[index].body.hasBall===players[i]
+          ) {
+              console.log("sdfadsfdsa");
+              players[index].body.hasBall = null;
+              players[i].body.pickedUp = false;
+              vx *= 8;
+              vy *= 8;
           }
 
           // "weight"
@@ -206,9 +229,13 @@ class Room {
   }
 
   _checkBallCollisions(entities, index) {
+    if (entities[index].body.pickedUp){
+      return;
+    }
     let ball1 = entities[index].body,
       ballCircle1 = ball1.circle.center,
       hasCollision = false;
+    
 
     // collision between ball with every other entity
     for (let i = 0; i < entities.length; ++i) {

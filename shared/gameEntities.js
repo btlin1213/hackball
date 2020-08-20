@@ -38,7 +38,7 @@ class Player extends Entity {
   }
   init() {
     this.moving = false;
-    this.hasBall = false;
+    this.hasBall = null;
     this.ballId = null;
     this.pickUp = false;
     this.throw = false;

@@ -76,8 +76,8 @@ export default class Board extends State {
     // Get room changes
     listeners["roomUpdate"] = (data) => {
       if (this.projector)
-        this.projector.children = _.chunk(new Float32Array(data), 4);
-      console.log(this.projector.children);
+        this.projector.children = _.chunk(new Float32Array(data), 6);
+      //console.log(this.projector.children);
     };
 
     return listeners;
@@ -195,13 +195,12 @@ Board.Projector = class extends Layer {
     // Render players
     context.setFontSize(16);
     _.each(this.children, (player, index) => {
-      console.log(player);
+      //console.log(player);
       if (player.length == 6) {
         if (player[4] != 0.0 && player[5] != 0.0) {
           this.prev_mouse_pos_x = player[4];
           this.prev_mouse_pos_y = player[5];
         }
-
         player.pop();
         player.pop();
       }
@@ -426,7 +425,7 @@ Board.SettingsPopup = class extends Popup {
     this.matchPanel
       .add(new Button(new Rect(0, 0, 64, 0), "Jacinta"), { fill: [0, 1] })
       .addForwarder(Message.Type.MOUSE_CLICK, () => {
-        console.log("Make Jacinta");
+        console.log("Make Jacinda");
       });
     return this;
   }

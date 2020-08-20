@@ -217,7 +217,7 @@ class Circle extends Vec2 {
    * @returns {boolean}
    */
   intersect(circle) {
-    return this.distance(circle) < circle.r + this.r;
+    return this.distance(circle) <= circle.r + this.r;
   }
 }
 
