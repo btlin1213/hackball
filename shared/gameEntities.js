@@ -56,6 +56,80 @@ class Player extends Entity {
   }
 }
 
+// class Civilian extends Player {
+//   constructor() {
+//     super(room, circle, v, type=BoardBody.TYPES.PLAYER);
+//     this.pickedUpCorona = false;
+//     this.caughtCorona = false;
+//     this.wearingMask = false;
+//     this.speed = 1;
+//   }
+
+//   /**
+//    * attach coronavirus to player
+//    * @param {BoardBody} ball
+//    */
+//   _pickupCorona(ball) {
+//     // to be implemented
+//   }
+
+//   /**
+//    * throws coronavirus at target position coord
+//    * @param {Vec2} targetPosition
+//    */
+//   _throwCorona(targetPosition) {
+//     // to be implemented
+//   }
+// }
+
+// class Medic extends BoardBody {
+//   constructor() {
+//     super(room, circle, v, type=BoardBody.TYPES.PLAYER);
+//     this.pickedUpCorona = false;
+//     this.caughtCorona = false;
+//     this.wearingMask = false;
+//     this.curingPlayer = false;
+//     this.speed = 1;
+//   }
+//   /**
+//    * attach coronavirus to player
+//    * @param {BoardBody} ball
+//    */
+//   _pickupCorona(ball) {
+//     // to be implemented
+//   }
+
+//   /**
+//    * throws coronavirus at target position coord
+//    * @param {Vec2} targetPosition
+//    */
+//   _throwCorona(targetPosition) {
+//     // to be implemented
+//   }
+
+//   /**
+//    *
+//    * @param {BoardBody} player
+//    * @returns {BoardBody} player with wearingMask set to true
+//    */
+//   _curingPlayer(player) {
+//     // to be implemented
+
+//     // player.wearingMask = true;
+//     // return player;
+//   }
+// }
+
+// class Jacinda extends BoardBody {
+//   constructor() {
+//     super(room, circle, v, BoardBody.TYPES.PLAYER);
+//     this.caughtCorona = false;
+//     this.wearingMask = false;
+//     this.inParliament = false;
+//     this.speed = 1.5;
+//   }
+// }
+
 class Ball extends Entity {
   constructor(circle, id, v) {
     super(circle, v, Entity.TYPES.PLAYER);

@@ -22,7 +22,6 @@ class Vec2 {
   set xy(xy) {
     this.x = xy[0];
     this.y = xy[1];
-    return this;
   }
   get xy() {
     return [this.x, this.y];

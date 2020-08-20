@@ -25,80 +25,6 @@ BoardBody.TYPES = {
   BALL: 1,
 };
 
-class Civilian extends Boardbody {
-  constructor() {
-    super(room, circle, v, type=BoardBody.TYPES.PLAYER);
-    this.pickedUpCorona = false;
-    this.caughtCorona = false;
-    this.wearingMask = false;
-    this.speed = 1;
-  }
-
-  /**
-   * attach coronavirus to player
-   * @param {BoardBody} ball 
-   */
-  _pickupCorona(ball) {
-    // to be implemented
-  }
-
-  /**
-   * throws coronavirus at target position coord
-   * @param {Vec2} targetPosition 
-   */
-  _throwCorona(targetPosition) {
-    // to be implemented
-  }
-}
-
-class Medic extends BoardBody {
-  constructor() {
-    super(room, circle, v, type=BoardBody.TYPES.PLAYER);
-    this.pickedUpCorona = false;
-    this.caughtCorona = false;
-    this.wearingMask = false;
-    this.curingPlayer = false;
-    this.speed = 1;
-  }
-  /**
-   * attach coronavirus to player
-   * @param {BoardBody} ball 
-   */
-  _pickupCorona(ball) {
-    // to be implemented
-  }
-
-  /**
-   * throws coronavirus at target position coord
-   * @param {Vec2} targetPosition 
-   */
-  _throwCorona(targetPosition) {
-    // to be implemented
-  }
-  
-  /**
-   * 
-   * @param {BoardBody} player 
-   * @returns {BoardBody} player with wearingMask set to true
-   */
-  _curingPlayer(player) {
-    // to be implemented
-
-    // player.wearingMask = true;
-    // return player;
-  }
-}
-
-class Jacinda extends BoardBody {
-  constructor() {
-    super(room, circle, v, BoardBody.TYPES.PLAYER);
-    this.caughtCorona = false;
-    this.wearingMask = false;
-    this.inParliament = false;
-    this.speed = 1.5;
-  }
-}
-
 /**
  * Room class
  * @class
@@ -224,14 +150,11 @@ class Room {
         if (!p1.isBall && !p2.isBall) {
           // if one has corona and the other is medic, medic saves patient
           if (p1.isMedic && p2.caughtCorona) {
-            
           }
         }
         // if player and corona
         else {
-
         }
-
 
         if (!test) {
           let dist = p2.circle.distance(p1.circle),
@@ -286,27 +209,22 @@ class Room {
       ballCircle1 = ball1.circle.center,
       hasCollision = false;
 
-      // collision between ball with every other entity
-      for (let i=0; i<entities.length; ++i) {
-        // skip itself
-        if (i === index ) continue;
-        // collision between ball and player
-        else if (entities[i].body.type === BoardBody.TYPES.PLAYER) {
-          let player = entities[i].body,
-            playerCircle = player.circle.center;
-
-        }
-        // collision between ball and ball 
-        else if (entities[i].body.type === BoardBody.TYPES.BALL) {
-          let ball2 = entities[i].body,
-            ballCircle2 = ball2.circle.center;
-
-        }
+    // collision between ball with every other entity
+    for (let i = 0; i < entities.length; ++i) {
+      // skip itself
+      if (i === index) continue;
+      // collision between ball and player
+      else if (entities[i].body.type === BoardBody.TYPES.PLAYER) {
+        let player = entities[i].body,
+          playerCircle = player.circle.center;
       }
+      // collision between ball and ball
+      else if (entities[i].body.type === BoardBody.TYPES.BALL) {
+        let ball2 = entities[i].body,
+          ballCircle2 = ball2.circle.center;
+      }
+    }
   }
-
-
-
 
   /**
    * Set player position on board
@@ -383,15 +301,15 @@ class Room {
     const entities = _.concat(players, this.balls);
 
     // Socket data [x, y, r, flag]
-    let packSize = 6
-      , socketData = new Float32Array(cachedPlayers.length * packSize);
+    let packSize = 6,
+      socketData = new Float32Array(cachedPlayers.length * packSize);
 
     _.each(entities, (entity, index) => {
       let circle = entity.body.circle,
         v = entity.body.v,
         isBall = entity.body.type === BoardBody.TYPES.BALL;
-        isMedic = entity.body.type === Medic;
-        isJacinda = entity.body.type === Jacinda;
+      isMedic = entity.body.type === Medic;
+      isJacinda = entity.body.type === Jacinda;
 
       // Check collisions between players
       if (!isBall) this._checkPlayerCollisions(entities, index);
@@ -400,7 +318,6 @@ class Room {
       if (isBall) this._checkBallCollisions(entities, index);
 
       // Check collisions with goals
-  
 
       //   // If its colliding with goal
       //   if(collidingGoal) {
@@ -418,21 +335,24 @@ class Room {
 
       // Data structure: 0FFFFBRR
       let flags =
-          player.team
-        | (index === cachedPlayers.length - 1 && 1 << 2)
-        | player.flags << 3;
+        player.team |
+        (index === cachedPlayers.length - 1 && 1 << 2) |
+        (player.flags << 3);
 
       let mouse_pos_x = player.mouse_position_x || 0.0;
       let mouse_pos_y = player.mouse_position_y || 0.0;
-      socketData.set([
-        /** position */
-          circle.x
-        , circle.y
-        , circle.r
-        , flags
-        , mouse_pos_x
-        , mouse_pos_y /** todo: More flags */
-      ], index * packSize);
+      socketData.set(
+        [
+          /** position */
+          circle.x,
+          circle.y,
+          circle.r,
+          flags,
+          mouse_pos_x,
+          mouse_pos_y /** todo: More flags */,
+        ],
+        index * packSize
+      );
       //
       ///**
       // * Data in buffer is compressed, player must
@@ -466,8 +386,6 @@ class Room {
   start() {
     // assign roles
 
-
-  
     // Set balls
     this._createBalls();
 
