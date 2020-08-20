@@ -44,6 +44,16 @@ class Player extends Entity {
     this.throw = false;
     this.aimDirection = new Vec2(1, 0);
   }
+  toArray() {
+    const array = super.toArray();
+    const encoded = encodeBoolArray([
+      this.moving,
+      this.hadBall,
+      this.pickUp,
+      this.throw,
+    ]);
+    array.set(encoded, PACK.type + 1);
+  }
 }
 
 class Ball extends Entity {
@@ -77,4 +87,44 @@ function entitiesFromArray(array) {
   return entityArrays.map(entityFromArray);
 }
 
-console.log(entitiesFromArray([1, 2, 3, 0, 5, 6]));
+function encodeBoolArray(bools, size = 8, maxlen = Infinity) {
+  const encodedLength = Math.ceil(bools.length / size);
+  if (encodedLength > maxlen)
+    throw "Encoded boolean array exceeds the maximum length";
+  const encoded = new Array(encodedLength).fill(0);
+  bools.forEach((x, i) => {
+    var offset = i % size;
+    var idx = Math.floor(i / size);
+    encoded[idx] = encoded[idx] | (x << offset);
+  });
+  return encoded;
+}
+
+function decodeNumArray(nums, length, size = 8) {
+  if (nums.length * size < length)
+    throw "Expected number of booleans is larger than the decoded numbers array";
+  const bools = [];
+  for (var i = 0; i < length; i++) {
+    var idx = Math.floor(i / size);
+    var offset = i % size;
+    var bool = (nums[idx] & (1 << offset)) != 0;
+    bools.push(bool);
+  }
+  return bools;
+}
+
+// console.log(entitiesFromArray([1, 2, 3, 0, 5, 6]));
+// const nums = encodeBoolArray([
+//   true,
+//   false,
+//   true,
+//   true,
+//   true,
+//   false,
+//   false,
+//   false,
+//   true,
+// ]);
+// console.log(nums);
+// const decoded = decodeNumArray(nums, 9);
+// console.log(decoded);
