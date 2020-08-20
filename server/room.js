@@ -4,8 +4,9 @@ const md5 = require("blueimp-md5"),
 
 const { Vec2, Circle, Rect } = require("../shared/math"),
   config = require("../shared/config"),
-  io = require("../app");
-console.log(config)
+  io = require("../app"),
+  ge = require("../shared/gameEntities");
+console.log(config);
 /**
  * Body showed on board
  * @class
@@ -111,7 +112,7 @@ class Room {
     // Balls config
     this.numBalls = config.numBalls;
     this.ballR = config.ballR;
-    
+
     // todo: Vertical gates
     this.board = new Rect(0, 0, 600, 300);
     this.goals = {
@@ -238,10 +239,14 @@ class Room {
             vy = (c2.y - c1.y) / dist;
 
           // Kick if it's the ball
-          // if (i === players.length - 1 && players[index].flags & 2) {
-          //   vx *= 8;
-          //   vy *= 8;
-          // }
+
+          if (
+            players[i].body.type === BoardBody.TYPES.BALL &&
+            players[index].flags & 2
+          ) {
+            vx *= 8;
+            vy *= 8;
+          }
 
           // "weight"
           p1.v.mul(0.9);
@@ -354,13 +359,15 @@ class Room {
     margin = margin || 0;
 
     if (
-      body.circle.y < -margin ||
-      body.circle.y + body.circle.r * 2 > this.board.h + margin
+      (body.circle.y < -margin && body.v.y < 0) ||
+      (body.circle.y + body.circle.r * 2 > this.board.h + margin &&
+        body.v.y > 0)
     )
       body.v.y *= -1;
     if (
-      body.circle.x < -margin ||
-      body.circle.x + body.circle.r * 2 > this.board.w + margin
+      (body.circle.x < -margin && body.v.x < 0) ||
+      (body.circle.x + body.circle.r * 2 > this.board.w + margin &&
+        body.v.x > 0)
     )
       body.v.x *= -1;
 

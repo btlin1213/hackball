@@ -1,5 +1,5 @@
 import _ from "lodash";
-import io from "socket.io-client"
+import io from "socket.io-client";
 // import io from "./socket.io/socket.io.js";
 
 /** Connect socket to server */
@@ -9,19 +9,22 @@ var socket = null;
 var latency = 0;
 setInterval(() => {
   let t = Date.now();
-  socket && socket.emit("latency", null, () => {
-    latency = Date.now() - t;
-  });
+  socket &&
+    socket.emit("latency", null, () => {
+      latency = Date.now() - t;
+    });
 }, 100);
 
 export default {
-    get socket() { return socket; }
+  get socket() {
+    return socket;
+  },
 
   /**
    * Connect to server
    * @param ip  Server ip
    */
-  , connect(ip) {
+  connect(ip) {
     return new Promise((resolve, reject) => {
       socket = io();
       socket.on("serverReady", resolve);
@@ -31,20 +34,22 @@ export default {
         !socket.connected && reject("Server refused connection!");
       }, 1000);
     });
-  }
+  },
 
   /**
    * Get client ping
    */
-  , get ping() { return latency;  }
+  get ping() {
+    return latency;
+  },
 
   /**
    * Server user
    */
-  , user: {
-      nick: ""
-    , room: ""
-  }
+  user: {
+    nick: "",
+    room: "",
+  },
 
   /**
    * Emit data via socket
@@ -52,15 +57,13 @@ export default {
    * @param data  Socket data
    * @returns {Promise}
    */
-  , emit: function(func, data) {
+  emit: function (func, data) {
     let resolver = (resolve, reject) => {
-      socket.emit(func, data, callback => {
-        if(!callback || callback.error)
-          reject(callback.error || callback);
-        else
-          resolve(callback);
+      socket.emit(func, data, (callback) => {
+        if (!callback || callback.error) reject(callback.error || callback);
+        else resolve(callback);
       });
     };
     return new Promise(resolver);
-  }
-}
+  },
+};

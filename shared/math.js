@@ -6,15 +6,17 @@ const _ = require("lodash");
  */
 class Vec2 {
   constructor(x, y) {
-    this.x = x || .0;
-    this.y = y || .0;
+    this.x = x || 0.0;
+    this.y = y || 0.0;
 
     /** Bind method */
     this.sub = _.partial(this.add, _, -1.0);
   }
 
   /** Make clone of object */
-  clone() { return new Vec2(this.x, this.y); }
+  clone() {
+    return new Vec2(this.x, this.y);
+  }
 
   /** Getters/Setters */
   set xy(xy) {
@@ -33,7 +35,7 @@ class Vec2 {
    */
   add(vec, mul) {
     mul = mul || 1.0;
-    if(_.isArray(vec)) {
+    if (_.isArray(vec)) {
       this.x += vec[0] * mul;
       this.y += vec[1] * mul;
     } else {
@@ -48,7 +50,7 @@ class Vec2 {
    * @param vec Vector to multi-player
    */
   mul(vec) {
-    if(vec instanceof Vec2) {
+    if (vec instanceof Vec2) {
       this.x *= vec.x;
       this.y *= vec.y;
     } else {
@@ -69,7 +71,7 @@ class Vec2 {
    * Dot product of vector
    */
   get dot() {
-    return this.x*this.x + this.y*this.y
+    return this.x * this.x + this.y * this.y;
   }
 
   /**
@@ -78,10 +80,7 @@ class Vec2 {
    */
   normalize() {
     let len = this.length;
-    return new Vec2(
-        this.x / len
-      , this.y / len
-    );
+    return new Vec2(this.x / len, this.y / len);
   }
 
   /**
@@ -101,18 +100,19 @@ class Rect extends Vec2 {
   constructor(x, y, w, h) {
     super(x, y);
 
-    this.w = w || .0;
-    this.h = h || .0;
+    this.w = w || 0.0;
+    this.h = h || 0.0;
   }
 
   /** Make clone of object */
-  clone() { return new Rect(this.x, this.y, this.w, this.h ); }
+  clone() {
+    return new Rect(this.x, this.y, this.w, this.h);
+  }
 
   /** Getters/Setters */
   set wh(wh) {
     this.w = wh[0];
     this.h = wh[1];
-    return this;
   }
   get wh() {
     return [this.w, this.h];
@@ -127,15 +127,19 @@ class Rect extends Vec2 {
   }
 
   /** Get center */
-  get center() { return new Vec2(this.x + this.w / 2, this.y + this.h / 2); }
+  get center() {
+    return new Vec2(this.x + this.w / 2, this.y + this.h / 2);
+  }
 
   /**
    * Remove border
    * @param border  Border size
    */
   borderReduce(border) {
-    this.x += border; this.y += border;
-    this.w -= border * 2; this.h -= border * 2;
+    this.x += border;
+    this.y += border;
+    this.w -= border * 2;
+    this.h -= border * 2;
     return this;
   }
 
@@ -146,9 +150,7 @@ class Rect extends Vec2 {
    * @return  True if equals
    */
   equals(rect) {
-    return super.equals(rect)
-      && this.w === rect.w
-      && this.h === rect.h;
+    return super.equals(rect) && this.w === rect.w && this.h === rect.h;
   }
 
   /**
@@ -158,10 +160,12 @@ class Rect extends Vec2 {
    * @return True if intersect
    */
   intersect(rect) {
-    return rect.x + (rect.w || rect.r * 2 || 0) >= this.x
-      && rect.x <= this.x + this.w
-      && rect.y + (rect.h || rect.r * 2 || 0) >= this.y
-      && rect.y <= this.y + this.h;
+    return (
+      rect.x + (rect.w || rect.r * 2 || 0) >= this.x &&
+      rect.x <= this.x + this.w &&
+      rect.y + (rect.h || rect.r * 2 || 0) >= this.y &&
+      rect.y <= this.y + this.h
+    );
   }
 
   /**
@@ -171,10 +175,12 @@ class Rect extends Vec2 {
    * @return True if contains
    */
   contains(rect) {
-    return rect.x > this.x
-      && rect.x + (rect.w || rect.r * 2 || 0) < this.x + this.w
-      && rect.y > this.y
-      && rect.y + (rect.h || rect.r * 2 || 0) < this.y + this.h;
+    return (
+      rect.x > this.x &&
+      rect.x + (rect.w || rect.r * 2 || 0) < this.x + this.w &&
+      rect.y > this.y &&
+      rect.y + (rect.h || rect.r * 2 || 0) < this.y + this.h
+    );
   }
 }
 
@@ -184,7 +190,7 @@ class Rect extends Vec2 {
 class Circle extends Vec2 {
   constructor(x, y, r) {
     super(x, y);
-    this.r = r || .0;
+    this.r = r || 0.0;
   }
 
   /**
@@ -201,9 +207,9 @@ class Circle extends Vec2 {
    * @returns {number}
    */
   distance(circle) {
-    let x = this.x + this.r - circle.x - circle.r
-      , y = this.y + this.r - circle.y - circle.r;
-    return Math.sqrt(x*x + y*y);
+    let x = this.x + this.r - circle.x - circle.r,
+      y = this.y + this.r - circle.y - circle.r;
+    return Math.sqrt(x * x + y * y);
   }
 
   /**
@@ -218,7 +224,7 @@ class Circle extends Vec2 {
 
 /** Export modules */
 module.exports = {
-    Vec2: Vec2
-  , Rect: Rect
-  , Circle: Circle
+  Vec2: Vec2,
+  Rect: Rect,
+  Circle: Circle,
 };

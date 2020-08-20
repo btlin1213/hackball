@@ -16,9 +16,8 @@ import Client from "../multiplayer/client";
 export default class Canvas {
   constructor(context) {
     // Canvas context
-    this.context = _.isString(context) || !context
-      ? new Context(context)
-      : context;
+    this.context =
+      _.isString(context) || !context ? new Context(context) : context;
 
     // Background color
     this.background = Color.parseHex(Color.Hex.BLACK);
@@ -32,7 +31,9 @@ export default class Canvas {
   }
 
   /** Canvas context */
-  get ctx() { return this.context.ctx; }
+  get ctx() {
+    return this.context.ctx;
+  }
   get currentState() {
     return this.states[this.activeState];
   }
@@ -60,25 +61,29 @@ export default class Canvas {
     this.pressedKeys = {};
 
     // Handle key down
-    let keyDownHandler = e => {
+    let keyDownHandler = (e) => {
       let illegalCharacter = ~illegalCharacters.indexOf(e.which);
 
       this.pressedKeys[e.which] = true;
-      this.broadcast(new Message(
-          Message.Type[illegalCharacter ? 'KEY_ENTER' : 'KEY_DOWN']
-        , this, e.which
-      ));
+      this.broadcast(
+        new Message(
+          Message.Type[illegalCharacter ? "KEY_ENTER" : "KEY_DOWN"],
+          this,
+          e.which
+        )
+      );
       illegalCharacter && e.preventDefault();
     };
 
     // Handle key press
-    let keyPressHandler = e => {
-      !~illegalCharacters.indexOf(e.which) && this.broadcast(new Message(Message.Type.KEY_ENTER, this, e.which));
+    let keyPressHandler = (e) => {
+      !~illegalCharacters.indexOf(e.which) &&
+        this.broadcast(new Message(Message.Type.KEY_ENTER, this, e.which));
       e.preventDefault();
     };
 
     // Handle key up
-    let keyUpHandler = e => {
+    let keyUpHandler = (e) => {
       this.pressedKeys[e.which] = false;
       this.broadcast(new Message(Message.Type.KEY_UP, this, e.which));
       e.preventDefault();
@@ -103,9 +108,13 @@ export default class Canvas {
     let mousePressed = false;
     domInstance.translateEvent = (eventName, eventCode, data) => {
       let handler = () => {
-        switch(eventCode) {
-          case Message.Type.MOUSE_DOWN: mousePressed = true;  break;
-          case Message.Type.MOUSE_UP:   mousePressed = false; break;
+        switch (eventCode) {
+          case Message.Type.MOUSE_DOWN:
+            mousePressed = true;
+            break;
+          case Message.Type.MOUSE_UP:
+            mousePressed = false;
+            break;
         }
         this.broadcast(new Message(eventCode, this, data));
       };
@@ -113,33 +122,47 @@ export default class Canvas {
     };
 
     // On mouse scroll
-    let mouseScroll = e => {
+    let mouseScroll = (e) => {
       // Custom event data
       class ScrollAmount extends Vec2 {
         constructor(x, y) {
           super(x, y);
-          this.amount =  Math.sign(e.detail || e.originalEvent.deltaY);
+          this.amount = Math.sign(e.detail || e.originalEvent.deltaY);
         }
-        clone() { return new ScrollAmount(this.x, this.y); }
+        clone() {
+          return new ScrollAmount(this.x, this.y);
+        }
       }
-      this.broadcast(new Message(Message.Type.MOUSE_SCROLL, this, new ScrollAmount(mousePos.x, mousePos.y)));
+      this.broadcast(
+        new Message(
+          Message.Type.MOUSE_SCROLL,
+          this,
+          new ScrollAmount(mousePos.x, mousePos.y)
+        )
+      );
     };
 
     // Cached mouse position
-    let mousePos = new Vec2;
+    let mousePos = new Vec2();
     domInstance
-    /** MOUSE SCROLL */
+      /** MOUSE SCROLL */
       .on("mousewheel DOMMouseScroll", mouseScroll)
 
       /** MOUSE EVENT LISTENERS */
-      .mousemove(e => {
+      .mousemove((e) => {
         mousePos.xy = [
-            e.clientX - this.context.size.x
-          , e.clientY - this.context.size.y
+          e.clientX - this.context.size.x,
+          e.clientY - this.context.size.y,
         ];
 
         this.context.domElement.style.cursor = "auto";
-        this.broadcast(new Message(Message.Type[mousePressed ? 'MOUSE_DRAG' : 'MOUSE_MOVE'], this, mousePos));
+        this.broadcast(
+          new Message(
+            Message.Type[mousePressed ? "MOUSE_DRAG" : "MOUSE_MOVE"],
+            this,
+            mousePos
+          )
+        );
       })
 
       .translateEvent("click", Message.Type.MOUSE_CLICK, mousePos)
@@ -155,9 +178,7 @@ export default class Canvas {
    * @private
    */
   _initListeners() {
-    return this
-      ._initKeyboard()
-      ._initMouse();
+    return this._initKeyboard()._initMouse();
   }
 
   /**
@@ -165,11 +186,11 @@ export default class Canvas {
    * @param data          Event data
    * @param currentState  If true sends only to visible state
    */
-  broadcast(data, currentState=true) {
-    if(currentState)
+  broadcast(data, currentState = true) {
+    if (currentState)
       !_.isFunction(this.currentState) && this.currentState.onEvent(data);
     else
-      _.each(this.states, state => {
+      _.each(this.states, (state) => {
         state.onEvent(data);
       });
     data.finalCallback && data.finalCallback();
@@ -194,15 +215,14 @@ export default class Canvas {
    */
   _initState(state) {
     // Copy size of parent
-    if(!state.rect.w)
-      state.rect.wh = this.context.size.wh;
+    if (!state.rect.w) state.rect.wh = this.context.size.wh;
 
     state.canvas = this;
     state.waitingForSocket = true;
     state.init();
 
     // Load resources
-    _.each(state.assets, (val, key) =>  this.context.loadResource(key, val));
+    _.each(state.assets, (val, key) => this.context.loadResource(key, val));
     return state;
   }
 
@@ -212,13 +232,12 @@ export default class Canvas {
    * @param State       State class
    * @param setDefault  Set state default
    */
-  state(name, State, setDefault=false) {
+  state(name, State, setDefault = false) {
     console.assert(!this.states[name], "Application state already exists!");
 
     // Set state and init
-    this.states[name] = new State;
-    if(setDefault || _.size(this.states) === 1)
-      this.activeState = name;
+    this.states[name] = new State();
+    if (setDefault || _.size(this.states) === 1) this.activeState = name;
 
     // Init on adding
     this._initState(this.states[name]);
@@ -230,7 +249,7 @@ export default class Canvas {
    * @returns {Canvas}
    */
   openSocketListeners() {
-    _.each(this.states, state => {
+    _.each(this.states, (state) => {
       state.waitingForSocket && Canvas._initStateSocketListeners(state);
     });
     return this;
@@ -238,9 +257,9 @@ export default class Canvas {
 
   /** Game loop */
   run() {
-    let lastFrame = Date.now()
-      , delta = 0
-      , frameTime = 1000 / 30;
+    let lastFrame = Date.now(),
+      delta = 0,
+      frameTime = 1000 / 30;
 
     // Render loop
     let renderer = () => {
@@ -249,18 +268,23 @@ export default class Canvas {
       this.ctx.fillRect(0, 0, this.context.size.w, this.context.size.h);
 
       // Stop exec until something is loaded
-      if(this.context.currentLoading) {
+      if (this.context.currentLoading) {
         let title = "Loading resources...";
         this.context
           .fillWith(Color.Hex.WHITE)
           .setFontSize(16)
-          .drawText(title, new Vec2(this.context.size.w / 2 - this.context.textWidth(title) / 2, this.context.size.h - 18));
-
+          .drawText(
+            title,
+            new Vec2(
+              this.context.size.w / 2 - this.context.textWidth(title) / 2,
+              this.context.size.h - 18
+            )
+          );
       } else {
         let state = this.currentState;
-        if(state) {
+        if (state) {
           // Fixed step update
-          if(delta >= frameTime) {
+          if (delta >= frameTime) {
             delta -= frameTime;
             state.update();
           }

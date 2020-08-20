@@ -1,4 +1,4 @@
 module.exports = {
-    ballR: 6,
-    numBalls: 10
-}
+  ballR: 6,
+  numBalls: 10,
+};

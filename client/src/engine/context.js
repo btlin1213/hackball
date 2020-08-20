@@ -7,9 +7,11 @@ import { Rect } from "shared/math";
  * Resource loaders
  */
 var Loaders = {};
-Loaders["\.(?:png|jpg|jpeg)$"] = function(path) {
-  return new Promise(resolve => {
-    $("<img />").attr("src", path).load(e => resolve(e.target));
+Loaders[".(?:png|jpg|jpeg)$"] = function (path) {
+  return new Promise((resolve) => {
+    $("<img />")
+      .attr("src", path)
+      .load((e) => resolve(e.target));
   });
 };
 
@@ -19,19 +21,18 @@ Loaders["\.(?:png|jpg|jpeg)$"] = function(path) {
 export default class Context {
   constructor(selector) {
     // Create canvas if DOM selector is not provided
-    if(!selector) {
+    if (!selector) {
       this.domElement = $("<canvas />").prop({
-          width: 700
-        , height: 400
-        , tabindex: 1
+        width: 700,
+        height: 400,
+        tabindex: 1,
       })[0];
       $("body").append(this.domElement);
 
-    // Query canvas from DOM if exists
+      // Query canvas from DOM if exists
     } else {
       this.domElement = $(selector)[0];
-      if(!this.domElement)
-        throw "Cannot find canvas!";
+      if (!this.domElement) throw "Cannot find canvas!";
     }
 
     // Load font
@@ -48,10 +49,10 @@ export default class Context {
     // Get size of canvas
     let offset = $(this.domElement).offset();
     this.size = new Rect(
-        offset.left
-      , offset.top
-      , $(this.domElement).width()
-      , $(this.domElement).height()
+      offset.left,
+      offset.top,
+      $(this.domElement).width(),
+      $(this.domElement).height()
     );
 
     // Context resources
@@ -80,7 +81,7 @@ export default class Context {
    * @param width Line width
    * @returns {Context}
    */
-  strokeLine(p1, p2, width=3) {
+  strokeLine(p1, p2, width = 3) {
     this.ctx.beginPath();
     this.ctx.lineWidth = width;
     this.ctx.moveTo(p1.x, p1.y);
@@ -96,7 +97,7 @@ export default class Context {
    * @param fontName  Font name
    * @returns {Context}
    */
-  setFontSize(size=14, fontName="Canvas Font") {
+  setFontSize(size = 14, fontName = "Canvas Font") {
     this.ctx.font = `${size}px '${fontName}'`;
     return this;
   }
@@ -147,12 +148,7 @@ export default class Context {
    * @returns {Context}
    */
   fillRect(rect) {
-    this.ctx.fillRect(
-        rect.x
-      , rect.y
-      , rect.w
-      , rect.h
-    );
+    this.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
     return this;
   }
 
@@ -164,14 +160,9 @@ export default class Context {
    */
   strokeRect(rect, stroke) {
     this.ctx.save();
-    this.ctx.translate(.5, .5);
+    this.ctx.translate(0.5, 0.5);
     this.ctx.lineWidth = stroke || 1;
-    this.ctx.strokeRect(
-        rect.x
-      , rect.y
-      , rect.w
-      , rect.h
-    );
+    this.ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
     this.ctx.restore();
     return this;
   }
@@ -186,7 +177,7 @@ export default class Context {
   strokeCircle(pos, r, stroke) {
     this.ctx.beginPath();
     this.ctx.lineWidth = stroke;
-    this.ctx.arc(pos.x, pos.y, r, 0, 2. * Math.PI);
+    this.ctx.arc(pos.x, pos.y, r, 0, 2 * Math.PI);
     this.ctx.stroke();
     return this;
   }
@@ -207,10 +198,15 @@ export default class Context {
    * @returns {Context}
    */
   drawImage(resource, rect) {
-    if(!this.resources[resource])
-      this.loadResource(resource, resource);
+    if (!this.resources[resource]) this.loadResource(resource, resource);
     else
-      this.ctx.drawImage(this.resources[resource], rect.x, rect.y, rect.w, rect.h);
+      this.ctx.drawImage(
+        this.resources[resource],
+        rect.x,
+        rect.y,
+        rect.w,
+        rect.h
+      );
     return this;
   }
 
@@ -223,11 +219,11 @@ export default class Context {
   loadResource(id, path) {
     _.each(Loaders, (loader, regex) => {
       // Load resource and assign to array
-      if(new RegExp(regex).test(path)) {
+      if (new RegExp(regex).test(path)) {
         this.currentLoading++;
         loader(path)
           // Called after loading
-          .then(resource => {
+          .then((resource) => {
             this.resources[id] = resource;
             this.currentLoading--;
           });

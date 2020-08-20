@@ -24,10 +24,10 @@ export default class RoomList extends State {
     super(Layer.VBox);
 
     this.table = new Table([
-        ["", .03, column => new ListBox.ImageItem(`res/flags/${column}.png`)]
-      , ["Name", .57]
-      , ["Pass", .2]
-      , ["Total", .2]
+      ["", 0.03, (column) => new ListBox.ImageItem(`res/flags/${column}.png`)],
+      ["Name", 0.57],
+      ["Pass", 0.2],
+      ["Total", 0.2],
     ]);
   }
 
@@ -36,13 +36,14 @@ export default class RoomList extends State {
    * @private
    */
   reloadRoomList() {
-    Client
-      .emit("listRooms")
-      .then(list => {
+    Client.emit("listRooms")
+      .then((list) => {
         this.table.clear();
-        _.each(list, data => this.table.add(_.values(data)));
+        _.each(list, (data) => this.table.add(_.values(data)));
       })
-      .catch(_.partial(Popup.confirm, this, "Cannot fetch channels!", Popup.Type.OK));
+      .catch(
+        _.partial(Popup.confirm, this, "Cannot fetch channels!", Popup.Type.OK)
+      );
   }
 
   /**
@@ -51,15 +52,14 @@ export default class RoomList extends State {
    * @private
    */
   _joinRoom(roomName) {
-    Client
-      .emit("askToConnect", {name: roomName})
+    Client.emit("askToConnect", { name: roomName })
 
       // Authorize with password, empty if not
-      .then(data => {
-        return data.isLocked && Popup.input(this, "Password:") || "";
+      .then((data) => {
+        return (data.isLocked && Popup.input(this, "Password:")) || "";
       })
-      .then(password => {
-        return Client.emit("authorizeToRoom", {pass: password});
+      .then((password) => {
+        return Client.emit("authorizeToRoom", { pass: password });
       })
 
       // Redirect to new state
@@ -75,14 +75,14 @@ export default class RoomList extends State {
   /** @inheritdoc */
   init() {
     // List of channels
-    this.add(this.table, {fill: [1., .7]});
+    this.add(this.table, { fill: [1, 0.7] });
 
     // List methods
-    let toolbar = this.add(new Layer(Layer.HBox), {fill: [1., .3]});
-    toolbar.add(new RoomList.CreatorPopup, {fill: [.7, 1.]});
+    let toolbar = this.add(new Layer(Layer.HBox), { fill: [1, 0.3] });
+    toolbar.add(new RoomList.CreatorPopup(), { fill: [0.7, 1] });
 
     // Room list utils
-    let utils = toolbar.add(new Layer(Layer.GridBox(2, 3)), {fill: [.3, 1.]});
+    let utils = toolbar.add(new Layer(Layer.GridBox(2, 3)), { fill: [0.3, 1] });
 
     // Refresh button
     utils
@@ -95,20 +95,23 @@ export default class RoomList extends State {
       .addForwarder(Message.Type.MOUSE_CLICK, () => {
         // Join to selected room
         let selectedCol = this.table.listbox.selected;
-        if(selectedCol)
-          this._joinRoom(selectedCol[1]);
-        else
-          Popup.confirm(this, "Choose room first!");
+        if (selectedCol) this._joinRoom(selectedCol[1]);
+        else Popup.confirm(this, "Choose room first!");
       });
 
     utils
-      .add(new Button(new Rect(0, 0, 90, 16), "About"), {expand: 2})
+      .add(new Button(new Rect(0, 0, 90, 16), "About"), { expand: 2 })
       .addForwarder(
-          Message.Type.MOUSE_CLICK
-        , _.partial(Popup.confirm, this, "HackBall Ver. 0.1, build from Soccer.JS", Popup.Type.OK)
+        Message.Type.MOUSE_CLICK,
+        _.partial(
+          Popup.confirm,
+          this,
+          "HackBall Ver. 0.1, build from Soccer.JS",
+          Popup.Type.OK
+        )
       );
   }
-};
+}
 
 /**
  * Room creator popup
@@ -116,7 +119,7 @@ export default class RoomList extends State {
  */
 RoomList.CreatorPopup = class extends Layer {
   constructor() {
-    super(Layer.HBox, new Rect);
+    super(Layer.HBox, new Rect());
   }
 
   /**
@@ -125,17 +128,16 @@ RoomList.CreatorPopup = class extends Layer {
    */
   createRoom() {
     let data = {
-        name: this.name.text
-      , pass: this.pass.text
-      , hidden: this.hidden.checked
-      , players: parseInt(this.players.listbox.selected) || 2
+      name: this.name.text,
+      pass: this.pass.text,
+      hidden: this.hidden.checked,
+      players: parseInt(this.players.listbox.selected) || 2,
     };
-    Client
-      .emit("createRoom", data)
+    Client.emit("createRoom", data)
 
       // After created
       .then(_.partial(Popup.confirm, this, "Success!", Popup.Type.OK))
-      .then(() => this.canvas.activeState = "board")
+      .then(() => (this.canvas.activeState = "board"))
 
       // On error
       .catch(_.partial(Popup.confirm, this));
@@ -143,18 +145,22 @@ RoomList.CreatorPopup = class extends Layer {
 
   /** @inheritdoc */
   init() {
-    let left = this.add(new Layer(Layer.GridBox(2, 4)), {fill: [.7, 1.]});
+    let left = this.add(new Layer(Layer.GridBox(2, 4)), { fill: [0.7, 1] });
 
     // Title
-    left.add(new Text(new Rect(0, 0, 0, 13), "Create room"), {expand: 2});
+    left.add(new Text(new Rect(0, 0, 0, 13), "Create room"), { expand: 2 });
 
     // Room name row
     left.add(new Text(new Rect(0, 0, 0, 14), "Room name:"));
-    this.name = left.add(new TextBox(new Rect(0, 0, 0, 16)), {fill: [.5, .0]});
+    this.name = left.add(new TextBox(new Rect(0, 0, 0, 16)), {
+      fill: [0.5, 0.0],
+    });
 
     // Password row
     left.add(new Text(new Rect(0, 0, 0, 14), "Password:"));
-    this.pass = left.add(new TextBox(new Rect(0, 0, 0, 16)), {fill: [.5, .0]});
+    this.pass = left.add(new TextBox(new Rect(0, 0, 0, 16)), {
+      fill: [0.5, 0.0],
+    });
 
     // Creator row
     this.hidden = left.add(new Radio(new Rect(0, 0, 16, 14), "Hidden"));
@@ -163,7 +169,7 @@ RoomList.CreatorPopup = class extends Layer {
       .addForwarder(Message.Type.MOUSE_CLICK, this.createRoom.bind(this));
 
     // Max players count
-    this.players = this.add(new Table([["Players:", 1.0]]), {fill: [.3, 1.]});
+    this.players = this.add(new Table([["Players:", 1.0]]), { fill: [0.3, 1] });
     this.players
       .setRows(["2", "4", "6", "8", "10", "12", "16", "18"])
       .listbox.setSelectedIndex(1);
