@@ -14,6 +14,8 @@ class Player {
     this.socket = socket;
     this.flags = 0;
     this.room = null;
+    this.mouse_position_x = 0.0;
+    this.mouse_position_y = 0.0;
 
     // Get global IP
     let ip = geoip.lookup(socket.request.connection.remoteAddress);
@@ -105,6 +107,10 @@ class Player {
       .on("move", dir => {
         if(this.body && this.body.v.length <= 1.8)
           this.body.v.add(dir, .35);
+      })
+      .on("mouse_position", vec =>{
+        this.mouse_position_x = vec.x;
+        this.mouse_position_y = vec.y;
       })
 
       /** Ping pong for latency */
