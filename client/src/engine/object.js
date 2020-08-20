@@ -10,8 +10,8 @@ export class Child {
   constructor(rect) {
     this.rect = rect;
 
-    this.border = new Vec2;
-    this.padding = new Vec2;
+    this.border = new Vec2();
+    this.padding = new Vec2();
   }
 
   /**
@@ -38,7 +38,7 @@ export class Layer extends Child {
    * @param layout  Layout manager
    * @param maxSize Maximum size of container
    */
-  constructor(layout=null, maxSize=new Rect()) {
+  constructor(layout = null, maxSize = new Rect()) {
     super(maxSize);
 
     // Children stack
@@ -83,9 +83,11 @@ export class Layer extends Child {
    */
   _reloadLayout() {
     this.popup = null;
-    if(this.layout) {
+    if (this.layout) {
       _.each(this.children, (item, index) => {
-        item.rect.xy = !index ? this._genChildPadding(item).xy : this.layout(item, this.children[index - 1]);
+        item.rect.xy = !index
+          ? this._genChildPadding(item).xy
+          : this.layout(item, this.children[index - 1]);
       });
     }
     return this;
@@ -98,15 +100,13 @@ export class Layer extends Child {
    */
   showPopup(popup) {
     // Center popup on screen
-    if(popup) {
-      this
-        ._makeChildOwner(popup)
-        .rect.xy = [
-            this.rect.w / 2 - popup.rect.w / 2
-          , this.rect.h / 2 - popup.rect.h / 2
-        ];
+    if (popup) {
+      this._makeChildOwner(popup).rect.xy = [
+        this.rect.w / 2 - popup.rect.w / 2,
+        this.rect.h / 2 - popup.rect.h / 2,
+      ];
     }
-    return this.popup = popup;
+    return (this.popup = popup);
   }
 
   /**
@@ -149,41 +149,41 @@ export class Layer extends Child {
     this._makeChildOwner(child);
 
     // If layout is present use it to organise position
-    if(this.layout) {
+    if (this.layout) {
       let padding = this._genChildPadding(child);
 
       // Change border of child
-      if(opts && !_.isUndefined(opts.border))
+      if (opts && !_.isUndefined(opts.border))
         child.border.xy = !opts.border ? [0, 0] : opts.border;
 
       // Remove optional opts
-      if(!opts || opts.useLayout !== false) {
+      if (!opts || opts.useLayout !== false) {
         // Use layout placement
-        child.rect.xy = this.layout(child, _.last(this.children), opts) || padding.xy;
+        child.rect.xy =
+          this.layout(child, _.last(this.children), opts) || padding.xy;
 
         // Disable smoothing
-        child.rect.xy = [
-            parseInt(child.rect.x)
-          , parseInt(child.rect.y)
-        ];
+        child.rect.xy = [parseInt(child.rect.x), parseInt(child.rect.y)];
       }
 
       // Optional layout params
-      if(opts && opts.fill) {
+      if (opts && opts.fill) {
         // Calc filling size for every axis
-        let calcInnerSize = axis => {
-          let fill = opts.fill[+(axis === "y")]
-            , sizeParam = axis === "y" ? "h" : "w";
-          if(fill)
-            return Math.min(this.rect[sizeParam] - child.rect[axis] - padding[axis], (this.rect[sizeParam] - padding[axis] * 2) * fill);
-          else
-            return child.rect[sizeParam];
+        let calcInnerSize = (axis) => {
+          let fill = opts.fill[+(axis === "y")],
+            sizeParam = axis === "y" ? "h" : "w";
+          if (fill)
+            return Math.min(
+              this.rect[sizeParam] - child.rect[axis] - padding[axis],
+              (this.rect[sizeParam] - padding[axis] * 2) * fill
+            );
+          else return child.rect[sizeParam];
         };
 
         // Placement of child
         child.rect.wh = [
-            parseInt(calcInnerSize("x"))
-          , parseInt(calcInnerSize("y"))
+          parseInt(calcInnerSize("x")),
+          parseInt(calcInnerSize("y")),
         ];
       }
     }
@@ -196,18 +196,15 @@ export class Layer extends Child {
 
   /** @inheritdoc */
   draw(context) {
-    if(this.debugLayer)
-      context
-        .strokeWith("#00ff00")
-        .strokeRect(this.rect);
+    if (this.debugLayer) context.strokeWith("#00ff00").strokeRect(this.rect);
 
     context.ctx.save();
     context.ctx.translate(this.rect.x, this.rect.y);
 
-    _.each(this.children, child => {
+    _.each(this.children, (child) => {
       !child.disabled && child.draw(context);
     });
-    if(this.popup) {
+    if (this.popup) {
       context
         .fillWith("rgba(0, 0, 0, .75")
         .fillRect(new Rect(0, 0, this.rect.w, this.rect.h));
@@ -223,37 +220,37 @@ export class Layer extends Child {
    */
   onEvent(event) {
     // TODO: use clone
-    if(event.isMouseEvent()) {
+    if (event.isMouseEvent()) {
       // If layer has rect property check mousePos
-      if(!this.popup && this.rect.w * this.rect.h && !this.rect.contains(event.data))
+      if (
+        !this.popup &&
+        this.rect.w * this.rect.h &&
+        !this.rect.contains(event.data)
+      )
         return false;
 
       // Clone event
       event = new Message(
-          event.type
-        , event.creator
-        , event.data.clone().sub(this.rect)
-        , event.finalCallback
+        event.type,
+        event.creator,
+        event.data.clone().sub(this.rect),
+        event.finalCallback
       );
     }
 
     // Popup receive event first
-    if(this.popup)
-      this.popup.onEvent(event);
-
+    if (this.popup) this.popup.onEvent(event);
     // Children receive messages when forwarding is enabled
-    else if(this.eventForwarding) {
-      _.each(this.children, child => {
+    else if (this.eventForwarding) {
+      _.each(this.children, (child) => {
         // Ignore if disabled
-        if(child.disabled)
-          return;
+        if (child.disabled) return;
 
         // Mark child as focus
         let result = child.onEvent(event);
-        if(result === true) {
+        if (result === true) {
           // Remove and add to top
-          this.children = _
-            .chain(this.children)
+          this.children = _.chain(this.children)
             .tap(_.partialRight(_.remove, child))
             .unshift(child)
             .value();
@@ -265,53 +262,70 @@ export class Layer extends Child {
 
   /** Update children */
   update() {
-    if(this.popup)
-      this.popup.update();
+    if (this.popup) this.popup.update();
     else
-      _.each(this.children, child => {
+      _.each(this.children, (child) => {
         !child.disabled && child.update && child.update();
       });
   }
 }
 
 /** Horizontal/Vertical box */
-Layer.HBox = function(child, prev) {
-  return prev &&
-    [ prev.rect.x + prev.rect.w + prev.border.x + child.border.x
-    , this.padding.y + child.border.y
-    ];
+Layer.HBox = function (child, prev) {
+  return (
+    prev && [
+      prev.rect.x + prev.rect.w + prev.border.x + child.border.x,
+      this.padding.y + child.border.y,
+    ]
+  );
 };
-Layer.VBox = function(child, prev) {
-  return prev &&
-    [ this.padding.x + child.border.x
-    , prev.rect.y + prev.rect.h + prev.border.y + child.border.y
-    ];
+Layer.VBox = function (child, prev) {
+  return (
+    prev && [
+      this.padding.x + child.border.x,
+      prev.rect.y + prev.rect.h + prev.border.y + child.border.y,
+    ]
+  );
 };
 
 /** Titled list e.g. forms */
-Layer.GridBox = function(cols, rows) {
-  return function(child, prev, opts) {
-    this.gridChildren = (this.gridChildren || this.children.length);
+Layer.GridBox = function (cols, rows) {
+  return function (child, prev, opts) {
+    this.gridChildren = this.gridChildren || this.children.length;
 
     // Column index
     let colIndex = this.gridChildren % cols;
 
     // New position
-    let pos =
-            [ (this.rect.w - this.padding.x * 2) / cols * colIndex + this.padding.x
-            , (this.rect.h - this.padding.y * 2) / rows * Math.floor(this.gridChildren / cols) + this.padding.y
-            ];
+    let pos = [
+      ((this.rect.w - this.padding.x * 2) / cols) * colIndex + this.padding.x,
+      ((this.rect.h - this.padding.y * 2) / rows) *
+        Math.floor(this.gridChildren / cols) +
+        this.padding.y,
+    ];
 
-    this.gridChildren += ((opts && opts.expand) || 1);
+    this.gridChildren += (opts && opts.expand) || 1;
     return pos;
   };
 };
 
 /** Border box */
-Layer.BorderBox = function(child, prev, opts) {
+Layer.BorderBox = function (child, prev, opts) {
   return [
-      Math.max(this.padding.x, Math.min(this.rect.w * opts.align[0] - child.rect.w / 2, this.rect.w - child.rect.w - this.padding.x))
-    , Math.max(this.padding.y, Math.min(this.rect.h * opts.align[1] - child.rect.h / 2, this.rect.h - child.rect.h - this.padding.y))
+    Math.max(
+      this.padding.x,
+      Math.min(
+        this.rect.w * opts.align[0] - child.rect.w / 2,
+        this.rect.w - child.rect.w - this.padding.x
+      )
+    ),
+    Math.max(
+      this.padding.y,
+      Math.min(
+        this.rect.h * opts.align[1] - child.rect.h / 2,
+        this.rect.h - child.rect.h - this.padding.y
+      )
+    ),
   ];
 };
 

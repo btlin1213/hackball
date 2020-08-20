@@ -17,16 +17,23 @@ export default class Message {
   }
 
   /** Prevent finalCallback executing */
-  preventDefault() { this.finalCallback = null; }
+  preventDefault() {
+    this.finalCallback = null;
+  }
 
   /** Check is mouse event */
   isMouseEvent() {
-    return this.type >= Message.Type.MOUSE_DOWN && this.type <= Message.Type.MOUSE_CLICK;
+    return (
+      this.type >= Message.Type.MOUSE_DOWN &&
+      this.type <= Message.Type.MOUSE_CLICK
+    );
   }
 
   /** Check is keyboard event */
   isKeyboardEvent() {
-    return this.type >= Message.Type.KEY_DOWN && this.type <= Message.Type.KEY_ENTER;
+    return (
+      this.type >= Message.Type.KEY_DOWN && this.type <= Message.Type.KEY_ENTER
+    );
   }
 }
 
@@ -35,15 +42,15 @@ export default class Message {
  */
 Message.Type = {
   // Mouse events
-    MOUSE_DOWN:   1
-  , MOUSE_UP:     2
-  , MOUSE_DRAG:   3
-  , MOUSE_SCROLL: 4
-  , MOUSE_MOVE:   5
-  , MOUSE_CLICK:  6
+  MOUSE_DOWN: 1,
+  MOUSE_UP: 2,
+  MOUSE_DRAG: 3,
+  MOUSE_SCROLL: 4,
+  MOUSE_MOVE: 5,
+  MOUSE_CLICK: 6,
 
   // Keyboard Events
-  , KEY_DOWN:     7
-  , KEY_UP:       8
-  , KEY_ENTER:    9
+  KEY_DOWN: 7,
+  KEY_UP: 8,
+  KEY_ENTER: 9,
 };
