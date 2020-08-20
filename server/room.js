@@ -135,6 +135,7 @@ class Room {
     let p1 = players[index].body,
       c1 = p1.circle.center,
       hasCollision = false;
+    const test = false;
 
     // collision between every player with every other entity (ball and player)
     for (let i = 0; i < players.length; ++i) {
@@ -241,7 +242,7 @@ class Room {
 
       // Move to center if has collision
       while (
-        this._checkCollisions(
+        this._checkPlayerCollisions(
           this.players,
           _.indexOf(this.players, player),
           true
@@ -302,14 +303,17 @@ class Room {
 
     // Socket data [x, y, r, flag, mouse_position_x, mouse_position_y]
     let packSize = 6,
-      socketData = new Float32Array(cachedPlayers.length * packSize);
+      socketData = new Float32Array(entities.length * packSize);
 
     _.each(entities, (entity, index) => {
       let circle = entity.body.circle,
         v = entity.body.v,
         isBall = entity.body.type === BoardBody.TYPES.BALL;
-      isMedic = entity.body.type === Medic;
-      isJacinda = entity.body.type === Jacinda;
+      // isMedic = entity.body.type === Medic;
+      // isJacinda = entity.body.type === Jacinda;
+      // Hack change, change back when class types are defined
+      var isMedic = false;
+      var isJacinda = false;
 
       // Check collisions between players
       if (!isBall) this._checkPlayerCollisions(entities, index);
@@ -334,13 +338,10 @@ class Room {
       v.mul(0.95);
 
       // Data structure: 0FFFFBRR
-      let flags =
-        player.team |
-        (index === cachedPlayers.length - 1 && 1 << 2) |
-        (player.flags << 3);
+      let flags = entity.team | (isBall && 1 << 2) | (entity.flags << 3);
 
-      let mouse_pos_x = player.mouse_position_x || 0.0;
-      let mouse_pos_y = player.mouse_position_y || 0.0;
+      let mouse_pos_x = entity.mouse_position_x || 0.0;
+      let mouse_pos_y = entity.mouse_position_y || 0.0;
       socketData.set(
         [
           /** position */
@@ -368,7 +369,7 @@ class Room {
 
   _createBalls() {
     this.balls = [];
-    const yInterval = this.board.h / (this.numBalls + 1);
+    // const yInterval = this.board.h / (this.numBalls + 1);
     for (var i = 0; i < this.numBalls; i++) {
       var x = Math.random() * this.board.w;
       var y = Math.random() * this.board.h;
