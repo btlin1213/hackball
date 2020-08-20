@@ -24,6 +24,80 @@ BoardBody.TYPES = {
   BALL: 1,
 };
 
+class Civilian extends Boardbody {
+  constructor() {
+    super(room, circle, v, type=BoardBody.TYPES.PLAYER);
+    this.pickedUpCorona = false;
+    this.caughtCorona = false;
+    this.wearingMask = false;
+    this.speed = 1;
+  }
+
+  /**
+   * attach coronavirus to player
+   * @param {BoardBody} ball 
+   */
+  _pickupCorona(ball) {
+    // to be implemented
+  }
+
+  /**
+   * throws coronavirus at target position coord
+   * @param {Vec2} targetPosition 
+   */
+  _throwCorona(targetPosition) {
+    // to be implemented
+  }
+}
+
+class Medic extends BoardBody {
+  constructor() {
+    super(room, circle, v, type=BoardBody.TYPES.PLAYER);
+    this.pickedUpCorona = false;
+    this.caughtCorona = false;
+    this.wearingMask = false;
+    this.curingPlayer = false;
+    this.speed = 1;
+  }
+  /**
+   * attach coronavirus to player
+   * @param {BoardBody} ball 
+   */
+  _pickupCorona(ball) {
+    // to be implemented
+  }
+
+  /**
+   * throws coronavirus at target position coord
+   * @param {Vec2} targetPosition 
+   */
+  _throwCorona(targetPosition) {
+    // to be implemented
+  }
+  
+  /**
+   * 
+   * @param {BoardBody} player 
+   * @returns {BoardBody} player with wearingMask set to true
+   */
+  _curingPlayer(player) {
+    // to be implemented
+
+    // player.wearingMask = true;
+    // return player;
+  }
+}
+
+class Jacinda extends BoardBody {
+  constructor() {
+    super(room, circle, v, BoardBody.TYPES.PLAYER);
+    this.caughtCorona = false;
+    this.wearingMask = false;
+    this.inParliament = false;
+    this.speed = 1.5;
+  }
+}
+
 /**
  * Room class
  * @class
@@ -128,39 +202,52 @@ class Room {
    * Check room collisions
    * @param players Players array
    * @param index   Player index
-   * @param test    Only tests
    * @private
    */
-  _checkCollisions(players, index, test) {
+  _checkPlayerCollisions(players, index) {
     let p1 = players[index].body,
       c1 = p1.circle.center,
       hasCollision = false;
 
+    // collision between every player with every other entity (ball and player)
     for (let i = 0; i < players.length; ++i) {
       if (i === index) continue;
 
-      // Get center of circle
+      // Get center of circle of second entity
       let p2 = players[i].body,
         c2 = p2.circle.center;
 
       // If the circles are colliding
       if (p1.circle.intersect(p2.circle)) {
+        // if both players
+        if (!p1.isBall && !p2.isBall) {
+          // if one has corona and the other is medic, medic saves patient
+          if (p1.isMedic && p2.caughtCorona) {
+            
+          }
+        }
+        // if player and corona
+        else {
+
+        }
+
+
         if (!test) {
           let dist = p2.circle.distance(p1.circle),
             vx = (c2.x - c1.x) / dist,
             vy = (c2.y - c1.y) / dist;
 
           // Kick if it's the ball
-          if (i === players.length - 1 && players[index].flags & 2) {
-            vx *= 8;
-            vy *= 8;
-          }
+          // if (i === players.length - 1 && players[index].flags & 2) {
+          //   vx *= 8;
+          //   vy *= 8;
+          // }
 
           // "weight"
           p1.v.mul(0.9);
 
           // Make ball owner
-          if (!p1.owner || p1.owner === -1) p1.owner = i;
+          // if (!p1.owner || p1.owner === -1) p1.owner = i;
 
           // Add to velocity vector
           if (
@@ -188,6 +275,33 @@ class Room {
     if (!hasCollision) players[players.length - 1].owner = -1;
     return hasCollision;
   }
+
+  _checkBallCollisions(entities, index) {
+    let ball1 = entities[index].body,
+      ballCircle1 = ball1.circle.center,
+      hasCollision = false;
+
+      // collision between ball with every other entity
+      for (let i=0; i<entities.length; ++i) {
+        // skip itself
+        if (i === index ) continue;
+        // collision between ball and player
+        else if (entities[i].body.type === BoardBody.TYPES.PLAYER) {
+          let player = entities[i].body,
+            playerCircle = player.circle.center;
+
+        }
+        // collision between ball and ball 
+        else if (entities[i].body.type === BoardBody.TYPES.BALL) {
+          let ball2 = entities[i].body,
+            ballCircle2 = ball2.circle.center;
+
+        }
+      }
+  }
+
+
+
 
   /**
    * Set player position on board
@@ -269,22 +383,17 @@ class Room {
       let circle = entity.body.circle,
         v = entity.body.v,
         isBall = entity.body.type === BoardBody.TYPES.BALL;
+        isMedic = entity.body.type === Medic;
+        isJacinda = entity.body.type === Jacinda;
 
-      // Check collisions without ball
-      if (!isBall) this._checkCollisions(entities, index);
+      // Check collisions between players
+      if (!isBall) this._checkPlayerCollisions(entities, index);
+
+      // Check collisions between balls and players/balls
+      if (isBall) this._checkBallCollisions(entities, index);
 
       // Check collisions with goals
-      // if(isBall && !this.board.contains(circle)) {
-      //   // Create colliding box for each goal and check
-      //   let collidingGoal = _.findKey(this.goals, goal => {
-      //     let rect = new Rect(
-      //         goal.p1[0] - goal.size + (goal.sign === -1 && circle.r * 2)
-      //       , goal.p1[1] + goal.size
-      //       , goal.p2[0] - goal.p1[0] + goal.size
-      //       , goal.p2[1] - goal.p1[1] - goal.size * 2
-      //     );
-      //     return rect.intersect(circle);
-      //   });
+  
 
       //   // If its colliding with goal
       //   if(collidingGoal) {
@@ -348,6 +457,10 @@ class Room {
    * Start/stop room loop
    */
   start() {
+    // assign roles
+
+
+  
     // Set balls
     this._createBalls();
 
