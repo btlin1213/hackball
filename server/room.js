@@ -162,37 +162,36 @@ class Room {
             vx = (c2.x - c1.x) / dist,
             vy = (c2.y - c1.y) / dist;
 
-            if (
-              // throw when space bar is pressed and there is a ball already picked up
-              players[i].body.type === BoardBody.TYPES.BALL  &&
-              players[index].flags & 2  &&
-              players[index].body.hasBall===players[i]
-              
-            ) {
-                // console.log("sdfadsfdhjsefbheabfjkfssa");
-                players[index].body.hasBall = null;
-                players[i].body.pickedUp = false;
-                vx *= 8;
-                vy *= 8;
-            }else if(
-            players[i].body.type === BoardBody.TYPES.BALL && 
-            (players[index].body.hasBall===players[i] || !players[index].body.hasBall)
+          if (
+            // throw when space bar is pressed and there is a ball already picked up
+            players[i].body.type === BoardBody.TYPES.BALL &&
+            players[index].flags & 2 &&
+            players[index].body.hasBall === players[i]
           ) {
-              // pick up ball
-              
-              // console.log("lol");
-              players[index].body.hasBall===players[i]
-              players[index].body.hasBall = players[i];
-              players[i].body.pickedUp = true;
-              players[i].body.circle.x = players[index].body.circle.x;
-              players[i].body.circle.y = players[index].body.circle.y;
-              players[i].body.v.x = players[index].body.v.x;
-              players[i].body.v.y = players[index].body.v.y;
-              continue;
-              // vx *= 8;
-              //vy *= 8;
-          } 
-          
+            // console.log("sdfadsfdhjsefbheabfjkfssa");
+            players[index].body.hasBall = null;
+            players[i].body.pickedUp = false;
+            vx *= 8;
+            vy *= 8;
+          } else if (
+            players[i].body.type === BoardBody.TYPES.BALL &&
+            (players[index].body.hasBall === players[i] ||
+              !players[index].body.hasBall)
+          ) {
+            // pick up ball
+
+            // console.log("lol");
+            players[index].body.hasBall === players[i];
+            players[index].body.hasBall = players[i];
+            players[i].body.pickedUp = true;
+            players[i].body.circle.x = players[index].body.circle.x;
+            players[i].body.circle.y = players[index].body.circle.y;
+            players[i].body.v.x = players[index].body.v.x;
+            players[i].body.v.y = players[index].body.v.y;
+            continue;
+            // vx *= 8;
+            //vy *= 8;
+          }
 
           // "weight"
           p1.v.mul(0.9);
@@ -228,13 +227,12 @@ class Room {
   }
 
   _checkBallCollisions(entities, index) {
-    if (entities[index].body.pickedUp){
+    if (entities[index].body.pickedUp) {
       return;
     }
     let ball1 = entities[index].body,
       ballCircle1 = ball1.circle.center,
       hasCollision = false;
-    
 
     // collision between ball with every other entity
     for (let i = 0; i < entities.length; ++i) {
