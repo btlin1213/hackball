@@ -334,8 +334,10 @@ class Room {
     this.balls = [];
     const yInterval = this.board.h / (this.numBalls + 1);
     for (var i = 0; i < this.numBalls; i++) {
-      var x = this.board.w / 2 - this.ballR;
-      var y = (i + 1) * yInterval - this.ballR;
+      var x = Math.random() * this.board.w;
+      var y = Math.random() * this.board.h;
+      // var x = this.board.w / 2 - this.ballR;
+      // var y = (i + 1) * yInterval - this.ballR;
       var circle = new Circle(x, y, this.ballR);
       this.balls.push({
         body: new BoardBody(this, circle, null, BoardBody.TYPES.BALL),
