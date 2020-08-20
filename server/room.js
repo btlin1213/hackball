@@ -300,7 +300,7 @@ class Room {
     const players = this.omitTeam(Room.Teams.SPECTATORS);
     const entities = _.concat(players, this.balls);
 
-    // Socket data [x, y, r, flag]
+    // Socket data [x, y, r, flag, mouse_position_x, mouse_position_y]
     let packSize = 6,
       socketData = new Float32Array(cachedPlayers.length * packSize);
 
