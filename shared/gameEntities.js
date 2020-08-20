@@ -32,7 +32,7 @@ Entity.TYPES = {
   BALL: 1,
 };
 
-class Player extends Entity {
+class PlayerBody extends Entity {
   constructor(circle, v) {
     super(circle, v, Entity.TYPES.PLAYER);
   }
@@ -42,6 +42,7 @@ class Player extends Entity {
     this.ballId = null;
     this.pickUp = false;
     this.throw = false;
+    this.frozen = false;
     this.aimDirection = new Vec2(1, 0);
   }
   toArray() {
@@ -130,7 +131,7 @@ class Player extends Entity {
 //   }
 // }
 
-class Ball extends Entity {
+class BallBody extends Entity {
   constructor(circle, id, v) {
     super(circle, v, Entity.TYPES.PLAYER);
     this.id = id;
@@ -148,10 +149,10 @@ function entityFromArray(array) {
   const r = array[PACK.r];
   const type = array[PACK.type];
   if (type == Entity.TYPES.PLAYER) {
-    return new Player(new Circle(x, y, r), null);
+    return new PlayerBody(new Circle(x, y, r), null);
   }
   if (type == Entity.TYPES.BALL) {
-    return new Ball(new Circle(x, y, r), null);
+    return new BallBody(new Circle(x, y, r), null);
   }
   throw "Type not found";
 }
