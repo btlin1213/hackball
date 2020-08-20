@@ -424,9 +424,9 @@ Board.SettingsPopup = class extends Popup {
       });
 
     this.matchPanel
-      .add(new Button(new Rect(0, 0, 64, 0), "Jacinta"), { fill: [0, 1] })
+      .add(new Button(new Rect(0, 0, 64, 0), "Jacinda"), { fill: [0, 1] })
       .addForwarder(Message.Type.MOUSE_CLICK, () => {
-        console.log("Make Jacinta");
+        console.log("Make Jacinda");
       });
     return this;
   }
