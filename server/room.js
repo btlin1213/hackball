@@ -5,7 +5,7 @@ const md5 = require("blueimp-md5"),
 const { Vec2, Circle, Rect } = require("../shared/math"),
   config = require("../shared/config"),
   io = require("../app"),
-  ge = require("../shared/gameEntities");
+  ge = require("../shared/gameBody");
 console.log(config);
 /**
  * Body showed on board
