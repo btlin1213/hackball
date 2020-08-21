@@ -5,10 +5,7 @@ const md5 = require("blueimp-md5"),
 const { Vec2, Circle, Rect } = require("../shared/math"),
   config = require("../shared/config"),
   io = require("../app"),
-  ge = require("../shared/gameEntities");
-const Player = require("./player");
-const { get } = require("jquery");
-
+  ge = require("../shared/gameBody");
 
 /**
  * Room class
@@ -120,7 +117,7 @@ class Room {
     let p1 = entities[index],
       c1 = p1.circle.center,
       isBall = p1 instanceof ge.BallBody;
-      hasCollision = false;
+    hasCollision = false;
     const test = false;
 
     // collision between every player with every other entity (ball and player)
@@ -139,49 +136,46 @@ class Room {
           // if only 1 has ball, the other is frozen
           if (p1.hasBall && !p2.hasBall) {
             p2.frozen = true; // how to tell client about frozen?
-          }
-          else if (!p1.hasBall && p2.hasBall) {
+          } else if (!p1.hasBall && p2.hasBall) {
             p1.frozen = true;
           }
         }
-     
 
         if (!test) {
           let dist = p2.circle.distance(p1.circle),
             vx = (c2.x - c1.x) / dist,
             vy = (c2.y - c1.y) / dist;
 
-            if (
-              // throw when space bar is pressed and there is a ball already picked up
-              entities[i] instanceof ge.BallBody  &&
-              entities[index].flags & 2  &&
-              entities[index].hasBall===playersList[i]
-              
-            ) {
-                // console.log("sdfadsfdhjsefbheabfjkfssa");
-                entities[index].hasBall = null;
-                entities[i].pickedUp = false;
-                vx *= 8;
-                vy *= 8;
-            }else if(
-            entities[i] instanceof ge.BallBody && 
-            (entities[index].hasBall===entities[i] || !entities[index].hasBall)
+          if (
+            // throw when space bar is pressed and there is a ball already picked up
+            players[i].body.type === BoardBody.TYPES.BALL &&
+            players[index].flags & 2 &&
+            players[index].body.hasBall === players[i]
           ) {
-              // pick up ball
-              
-              // console.log("lol");
-              entities[index].hasBall===entities[i]
-              entities[index].hasBall = entities[i];
-              entities[i].pickedUp = true;
-              entities[i].circle.x = entities[index].circle.x;
-              entities[i].circle.y = entities[index].circle.y;
-              entities[i].v.x = entities[index].v.x;
-              entities[i].v.y = entities[index].v.y;
-              continue;
-              // vx *= 8;
-              //vy *= 8;
-          } 
-          
+            // console.log("sdfadsfdhjsefbheabfjkfssa");
+            players[index].body.hasBall = null;
+            players[i].body.pickedUp = false;
+            vx *= 8;
+            vy *= 8;
+          } else if (
+            players[i].body.type === BoardBody.TYPES.BALL &&
+            (players[index].body.hasBall === players[i] ||
+              !players[index].body.hasBall)
+          ) {
+            // pick up ball
+
+            // console.log("lol");
+            players[index].body.hasBall === players[i];
+            players[index].body.hasBall = players[i];
+            players[i].body.pickedUp = true;
+            players[i].body.circle.x = players[index].body.circle.x;
+            players[i].body.circle.y = players[index].body.circle.y;
+            players[i].body.v.x = players[index].body.v.x;
+            players[i].body.v.y = players[index].body.v.y;
+            continue;
+            // vx *= 8;
+            //vy *= 8;
+          }
 
           // "weight"
           p1.v.mul(0.9);
@@ -216,10 +210,8 @@ class Room {
     return hasCollision;
   }
 
-
   // check collisions between flying balls and other entities
   _checkBallCollisions(entities, index) {
-
     let ball1 = entities[index],
       ballCircle1 = ball1.circle.center,
       hasCollision = false;
@@ -235,7 +227,7 @@ class Room {
       }
       // collision between flying ball and flying ball
       else if (entities[i] instanceof ge.BallBody) {
-        // to be implemented 
+        // to be implemented
       }
     }
   }
@@ -388,7 +380,7 @@ class Room {
       // var x = this.board.w / 2 - this.ballR;
       // var y = (i + 1) * yInterval - this.ballR;
       var circle = new Circle(x, y, this.ballR);
-      this.balls.push(new ge.BallBody(circle, i, new Vec2(0,0)));
+      this.balls.push({ body: new ge.BallBody(circle, i, new Vec2(0, 0)) });
     }
   }
   /**
@@ -459,9 +451,14 @@ class Room {
    * Join to room
    * @param player  Player
    * @returns {Room}
-   */ 
+   */
+
   join(player) {
-    _.assign(player, new ge.PlayerBody(new Circle(60, 60, 13), new Vec2(0, 0)));
+    _.assign(player, {
+      team: Room.Teams.SPECTATORS,
+      room: this,
+      body: new ge.PlayerBody(new Circle(60, 60, 13), new Vec2(0, 0)),
+    });
 
     // Join socket
     player.socket.join(this.name);
